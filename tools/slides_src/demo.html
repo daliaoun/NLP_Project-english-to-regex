@@ -1,0 +1,18 @@
+<section id="demo" data-transition="fade" style="background:#111A2C;color:#F1EEE5;font-family:'IBM Plex Sans', Arial, sans-serif;padding:96px 128px 160px;display:flex;flex-direction:column;gap:32px">
+<div style="display:flex;flex-direction:column;gap:12px">
+<p style="font-size:24px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#F2B544">Live demo</p>
+<h2 style="font-size:64px;font-weight:600;line-height:1.1;color:#F1EEE5">Type English, get a regex</h2>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px;background:#0B1322;border:1px solid #2C3B5C;border-radius:16px;padding:36px 40px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:26px;line-height:1.4;color:#9AA6BD">In the browser (no server), or: python src/demo.py --run results/attn</p>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:28px;line-height:1.4;color:#F1EEE5">English&gt; lines containing 'cat' at least 2 times</p>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:28px;line-height:1.4;color:#F2B544">Regex  : (.*cat){2,}.*</p>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:28px;line-height:1.4;color:#F1EEE5">English&gt; lines that contain 'error' and do not contain 'warning'</p>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:28px;line-height:1.4;color:#F2B544">Regex  : (.*error.*)&amp;(~(.*warning.*))</p>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:28px;line-height:1.4;color:#F1EEE5">English&gt; lines where 'price' comes before 'total'</p>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:28px;line-height:1.4;color:#F2B544">Regex  : .*price.*total.*</p>
+</div>
+<p style="font-size:28px;line-height:1.4;color:#B7C0D0">The website runs both trained models in JavaScript, checked against PyTorch on all 3,434 test sentences, tests the regex on your own lines and shows the attention weights.</p>
+<p style="position:absolute;left:128px;bottom:64px;width:1200px;font-size:24px;color:#9AA6BD">18  ·  Demo</p>
+<aside>Switch to the website here. Click the first examples, since they work, and show the line tester and the attention view. Then ask the audience for a description of their own, with any word in quotes. Be ready for it to fail on unusual wording; the harder-cases buttons show typical failures on purpose, and explaining them is part of the analysis. Everything runs in the browser, so the demo works without a network once the page has loaded.</aside>
+</section>

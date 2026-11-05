@@ -1,0 +1,20 @@
+{
+  "v": 4,
+  "createdOnFiles": {"v": 1, "at": "2026-10-31T19:50:00Z"},
+  "lists": "css",
+  "title": "NL2Regex: English to regular expressions",
+  "cover": "cover",
+  "order": ["cover", "task", "dataset", "prep", "model", "attention", "training", "metrics", "results", "findings", "curves", "heatmap", "examples", "errors", "limits", "demo", "wrap"],
+  "sections": {
+    "intro": {"description": "The task, the dataset and how the text is prepared.", "start": "cover"},
+    "model": {"description": "The encoder-decoder, attention and the training setup.", "start": "model"},
+    "results": {"description": "How we measure, what we got and what helped.", "start": "metrics"},
+    "analysis": {"description": "Training curves, attention, examples, errors and limits.", "start": "curves"},
+    "wrap": {"description": "Live demo and conclusion.", "start": "demo"}
+  },
+  "faces": {
+    "ibm-plex-sans": {"family": "IBM Plex Sans", "href": "https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap"},
+    "jetbrains-mono": {"family": "JetBrains Mono", "href": "https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap"}
+  },
+  "designSystems": []
+}

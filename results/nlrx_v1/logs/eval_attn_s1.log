@@ -1,0 +1,38 @@
+{
+  "mode": "greedy",
+  "n": 999,
+  "exact_match": 0.4034034034034034,
+  "bleu": 84.92655823310061,
+  "functional_acc": 0.6166166166166166,
+  "valid_rate": 0.996996996996997,
+  "n_nondegenerate_ref": 753,
+  "functional_acc_nondegenerate": 0.5737051792828686,
+  "em_nondegenerate": 0.39707835325365204,
+  "loss": 0.14688592065113648,
+  "perplexity": 1.1582218263011788,
+  "token_acc": 0.9561488673139159,
+  "n_unseen_target": 944,
+  "n_seen_target": 55,
+  "em_unseen_target": 0.4057203389830508,
+  "func_unseen_target": 0.6186440677966102,
+  "em_seen_target": 0.36363636363636365
+}
+{
+  "mode": "beam5",
+  "n": 999,
+  "exact_match": 0.3963963963963964,
+  "bleu": 84.11465872116631,
+  "functional_acc": 0.6126126126126126,
+  "valid_rate": 1.0,
+  "n_nondegenerate_ref": 753,
+  "functional_acc_nondegenerate": 0.5683930942895087,
+  "em_nondegenerate": 0.3891102257636122,
+  "loss": 0.14688592065113648,
+  "perplexity": 1.1582218263011788,
+  "token_acc": 0.9561488673139159,
+  "n_unseen_target": 944,
+  "n_seen_target": 55,
+  "em_unseen_target": 0.3961864406779661,
+  "func_unseen_target": 0.6133474576271186,
+  "em_seen_target": 0.4
+}

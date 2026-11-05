@@ -1,0 +1,28 @@
+<section id="limits" data-transition="fade" style="background:#F6F3EA;color:#17203A;font-family:'IBM Plex Sans', Arial, sans-serif;padding:96px 128px 160px;display:flex;flex-direction:column;gap:32px">
+<div style="display:flex;flex-direction:column;gap:12px">
+<p style="font-size:24px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#0B6465">Limitations and next steps</p>
+<h2 style="font-size:64px;font-weight:600;line-height:1.1">What this study cannot say, and what comes next</h2>
+</div>
+<div style="display:flex;gap:32px;align-items:flex-start">
+<div style="flex:1;display:flex;flex-direction:column;gap:16px;background:#FBFAF5;border:1px solid #DDD7C6;border-radius:16px;padding:36px">
+<h3 style="font-size:40px;font-weight:600;line-height:1.2;color:#7A4B00">Limitations</h3>
+<ul style="font-size:28px;line-height:1.4">
+<li>Template English is more regular than real requests: 99.4% is an in-distribution number</li>
+<li>The handwritten set is small (50) and mostly simple</li>
+<li>“Same behaviour” is a sampling test: we found one false “equivalent”</li>
+<li>Outputs are capped at 60 tokens</li>
+</ul>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:16px;background:#FBFAF5;border:1px solid #DDD7C6;border-radius:16px;padding:36px">
+<h3 style="font-size:40px;font-weight:600;line-height:1.2;color:#0B6465">Next steps</h3>
+<ul style="font-size:28px;line-height:1.4">
+<li>Human paraphrases of generated sentences, to make the training language more varied</li>
+<li>More constructions per condition, especially for negation</li>
+<li>A copy mechanism for literals written without quotes</li>
+<li>Exact DFA equivalence and grammar-constrained decoding</li>
+</ul>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1200px;font-size:24px;color:#5A6275">17  ·  Limitations</p>
+<aside>Being honest about limits matters here. The sentences are generated from templates, so the 99.4 percent is an in-distribution score; the held-out phrasings and the handwritten set are the more honest estimates, and the handwritten set is small. The behavioural check is a sampling test, and we found one case where it called a wrong regex equivalent, because no probe string had the right shape. The most useful next step is more varied training language, ideally human paraphrases of the generated sentences, since new wording is where the model fails.</aside>
+</section>

@@ -1,0 +1,25 @@
+[lstm_biattn_s1] params=2,273,707  train=8001 val=999
+[lstm_biattn_s1] ep 01 train 0.967 | val loss 0.425 ppl 1.53 tokacc 0.861 EM 0.038 BLEU 69.5 | 90s  *
+[lstm_biattn_s1] ep 02 train 0.393 | val loss 0.253 ppl 1.29 tokacc 0.924 EM 0.274 BLEU 80.0 | 73s  *
+[lstm_biattn_s1] ep 03 train 0.275 | val loss 0.207 ppl 1.23 tokacc 0.935 EM 0.314 BLEU 81.6 | 75s  *
+[lstm_biattn_s1] ep 04 train 0.213 | val loss 0.179 ppl 1.20 tokacc 0.943 EM 0.351 BLEU 82.8 | 73s  *
+[lstm_biattn_s1] ep 05 train 0.180 | val loss 0.152 ppl 1.16 tokacc 0.950 EM 0.418 BLEU 85.2 | 75s  *
+[lstm_biattn_s1] ep 06 train 0.163 | val loss 0.145 ppl 1.16 tokacc 0.953 EM 0.418 BLEU 85.0 | 70s
+[lstm_biattn_s1] ep 07 train 0.141 | val loss 0.138 ppl 1.15 tokacc 0.955 EM 0.425 BLEU 85.7 | 69s  *
+[lstm_biattn_s1] ep 08 train 0.131 | val loss 0.139 ppl 1.15 tokacc 0.956 EM 0.433 BLEU 85.4 | 89s  *
+[lstm_biattn_s1] ep 09 train 0.126 | val loss 0.133 ppl 1.14 tokacc 0.957 EM 0.441 BLEU 86.0 | 71s  *
+[lstm_biattn_s1] ep 10 train 0.113 | val loss 0.130 ppl 1.14 tokacc 0.959 EM 0.456 BLEU 86.5 | 71s  *
+[lstm_biattn_s1] ep 11 train 0.103 | val loss 0.144 ppl 1.15 tokacc 0.955 EM 0.406 BLEU 84.4 | 69s
+[lstm_biattn_s1] ep 12 train 0.096 | val loss 0.128 ppl 1.14 tokacc 0.960 EM 0.452 BLEU 86.7 | 69s
+[lstm_biattn_s1] ep 13 train 0.093 | val loss 0.128 ppl 1.14 tokacc 0.960 EM 0.441 BLEU 85.9 | 68s
+[lstm_biattn_s1] ep 14 train 0.085 | val loss 0.129 ppl 1.14 tokacc 0.961 EM 0.473 BLEU 86.4 | 108s  *
+[lstm_biattn_s1] ep 15 train 0.081 | val loss 0.130 ppl 1.14 tokacc 0.961 EM 0.458 BLEU 86.6 | 142s
+[lstm_biattn_s1] ep 16 train 0.072 | val loss 0.131 ppl 1.14 tokacc 0.961 EM 0.453 BLEU 86.3 | 142s
+[lstm_biattn_s1] ep 17 train 0.057 | val loss 0.132 ppl 1.14 tokacc 0.962 EM 0.461 BLEU 86.6 | 142s
+[lstm_biattn_s1] ep 18 train 0.050 | val loss 0.135 ppl 1.15 tokacc 0.961 EM 0.445 BLEU 86.3 | 142s
+[lstm_biattn_s1] ep 19 train 0.047 | val loss 0.139 ppl 1.15 tokacc 0.961 EM 0.447 BLEU 86.8 | 143s
+[lstm_biattn_s1] ep 20 train 0.041 | val loss 0.141 ppl 1.15 tokacc 0.960 EM 0.443 BLEU 86.5 | 144s
+[lstm_biattn_s1] ep 21 train 0.038 | val loss 0.146 ppl 1.16 tokacc 0.960 EM 0.450 BLEU 86.8 | 143s
+[lstm_biattn_s1] ep 22 train 0.037 | val loss 0.146 ppl 1.16 tokacc 0.960 EM 0.437 BLEU 86.8 | 142s
+[lstm_biattn_s1] early stop (no val-EM gain for 8 epochs)
+[lstm_biattn_s1] done: {'best_epoch': 14, 'best_val_em': 0.47347347347347346, 'epochs_run': 22, 'train_minutes': 36.827158240477246, 'n_params': 2273707}

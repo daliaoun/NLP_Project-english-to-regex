@@ -1,0 +1,23 @@
+{
+  "generated_main": 42000,
+  "rejected_contradiction_or_tautology_main": 5251,
+  "after_dedup": 41511,
+  "train": 37586,
+  "val": 2000,
+  "test": 1884,
+  "test_phrasing": 1500,
+  "test_handwritten": 50,
+  "unique_regex_structures_train": 14345,
+  "kinds_train": {
+    "or": 6984,
+    "and": 12116,
+    "not": 4425,
+    "atom": 14061
+  },
+  "kinds_test": {
+    "and": 1031,
+    "or": 597,
+    "not": 236,
+    "atom": 20
+  }
+}

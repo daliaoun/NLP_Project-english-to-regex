@@ -1,0 +1,31 @@
+<section id="dataset" data-transition="fade" style="background:#F6F3EA;color:#17203A;font-family:'IBM Plex Sans', Arial, sans-serif;padding:96px 128px 160px;display:flex;flex-direction:column;gap:26px">
+<div style="display:flex;flex-direction:column;gap:12px">
+<p style="font-size:24px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#0B6465">Dataset</p>
+<h2 style="font-size:64px;font-weight:600;line-height:1.1">41,000 verified pairs and three kinds of test</h2>
+</div>
+<div style="display:flex;gap:24px">
+<div style="flex:1;display:flex;flex-direction:column;gap:8px;background:#FBFAF5;border:1px solid #DDD7C6;border-radius:16px;padding:28px">
+<p style="font-size:64px;font-weight:600;line-height:1.1;color:#0B6465">13</p>
+<p style="font-size:26px;line-height:1.35;color:#4B5568">kinds of condition, combined with not, and, or</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:8px;background:#FBFAF5;border:1px solid #DDD7C6;border-radius:16px;padding:28px">
+<p style="font-size:64px;font-weight:600;line-height:1.1;color:#0B6465">216</p>
+<p style="font-size:26px;line-height:1.35;color:#4B5568">phrasing templates, plus synonyms, subjects and openers</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:8px;background:#FBFAF5;border:1px solid #DDD7C6;border-radius:16px;padding:28px">
+<p style="font-size:64px;font-weight:600;line-height:1.1;color:#0B6465">135</p>
+<p style="font-size:26px;line-height:1.35;color:#4B5568">literal words, numbers and phrases in quotes</p>
+</div>
+</div>
+<table style="font-size:25px">
+<tr><th style="width:26%">Split</th><th style="width:12%;text-align:right">Pairs</th><th style="width:62%">What it tests</th></tr>
+<tr><td>Train</td><td style="text-align:right">37,586</td><td>14,345 distinct regex structures</td></tr>
+<tr><td>Validation</td><td style="text-align:right">2,000</td><td>model selection, regexes unseen in training</td></tr>
+<tr><td>Test: new regexes</td><td style="text-align:right">1,884</td><td>new combinations and parameters, never in training</td></tr>
+<tr><td>Test: new phrasings</td><td style="text-align:right">1,500</td><td>11 sentence patterns held out of training, new regexes</td></tr>
+<tr><td>Test: handwritten</td><td style="text-align:right">50</td><td>descriptions written by hand in free wording</td></tr>
+</table>
+<p style="font-size:26px;line-height:1.4;color:#4B5568">The split is by regex: no regex structure appears in both training and a test set (except 46 of the 50 handwritten ones, which test wording, not structure).</p>
+<p style="position:absolute;left:128px;bottom:64px;width:1200px;font-size:24px;color:#5A6275">5  ·  Dataset</p>
+<aside>The generator knows thirteen kinds of condition, such as contains, starts with, at least N times, N times in a row, before, immediately followed by, length and made only of, and combines them with not, and, or. Sentences come from over two hundred phrasing templates. We split by regex, so the test regexes are new to the model. Because the in-distribution test could be too easy, we built two harder tests: one with sentence patterns that never appear in training, and fifty descriptions written by hand. For the handwritten set most regexes are simple, so it tests wording rather than new structure.</aside>
+</section>

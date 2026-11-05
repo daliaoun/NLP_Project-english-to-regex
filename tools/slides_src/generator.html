@@ -1,0 +1,23 @@
+<section id="generator" data-transition="fade" style="background:#F6F3EA;color:#17203A;font-family:'IBM Plex Sans', Arial, sans-serif;padding:96px 128px 160px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:12px">
+<p style="font-size:24px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#0B6465">VeriRegex: our verified dataset</p>
+<h2 style="font-size:64px;font-weight:600;line-height:1.1">Every label is checked by a second, independent definition</h2>
+</div>
+<div style="display:flex;align-items:center;gap:16px">
+<div style="flex:1;display:flex;flex-direction:column;gap:6px;background:#17203A;border-radius:16px;padding:24px"><p style="font-size:22px;color:#B7C0D0">1. Meaning tree</p><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:26px;color:#F2B544">atleast(‘cat’, 2)</p></div>
+<x-shape kind="arrow-right" style="width:48px;height:28px;background:#0B6465"></x-shape>
+<div style="flex:1.25;display:flex;flex-direction:column;gap:10px">
+<div style="display:flex;flex-direction:column;gap:4px;background:#FBFAF5;border:1px solid #DDD7C6;border-radius:14px;padding:16px 20px"><p style="font-size:22px;color:#4B5568">2a. English, many phrasings</p><p style="font-size:26px;line-height:1.3">lines where ‘cat’ appears at least twice</p></div>
+<div style="display:flex;flex-direction:column;gap:4px;background:#FBFAF5;border:1px solid #DDD7C6;border-radius:14px;padding:16px 20px"><p style="font-size:22px;color:#4B5568">2b. Regex</p><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:26px;color:#0B6465">(.*cat){2,}.*</p></div>
+<div style="display:flex;flex-direction:column;gap:4px;background:#FBFAF5;border:1px solid #DDD7C6;border-radius:14px;padding:16px 20px"><p style="font-size:22px;color:#4B5568">2c. Python predicate</p><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:26px;color:#0B6465">s.count('cat') &gt;= 2</p></div>
+</div>
+<x-shape kind="arrow-right" style="width:48px;height:28px;background:#0B6465"></x-shape>
+<div style="flex:1;display:flex;flex-direction:column;gap:8px;background:#DCEDEA;border:1px solid #B9D8D4;border-radius:16px;padding:24px"><p style="font-size:22px;color:#0B6465;font-weight:600">3. Check on about 300 probe strings</p><p style="font-size:26px;line-height:1.35">Regex and predicate must agree on every string, and some lines must match and some must not.</p></div>
+</div>
+<div style="display:flex;gap:24px">
+<div style="flex:1;display:flex;align-items:baseline;gap:16px;background:#FBFAF5;border:1px solid #DDD7C6;border-radius:16px;padding:20px 28px"><p style="font-size:48px;font-weight:600;color:#0B6465">0</p><p style="font-size:26px;line-height:1.35;color:#4B5568">disagreements: one would stop the build</p></div>
+<div style="flex:1;display:flex;align-items:baseline;gap:16px;background:#FBFAF5;border:1px solid #DDD7C6;border-radius:16px;padding:20px 28px"><p style="font-size:48px;font-weight:600;color:#0B6465">5,251</p><p style="font-size:26px;line-height:1.35;color:#4B5568">contradictions or tautologies thrown away</p></div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1200px;font-size:24px;color:#5A6275">4  ·  VeriRegex</p>
+<aside>The generator first draws a meaning, a small tree of conditions such as at least two times cat. From that one tree it writes the English, choosing among many phrasings, and the regular expression. Separately, the same tree is evaluated by a plain Python function that never looks at the regex. On roughly three hundred probe strings the regex, run through our own matcher, and the Python function must give the same answer every time; a single disagreement stops the build. We also throw away meanings that accept every line or no line, such as starts with a digit and starts with a letter, 5,251 of them.</aside>
+</section>

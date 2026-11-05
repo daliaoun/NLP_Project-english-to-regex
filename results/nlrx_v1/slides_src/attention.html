@@ -1,0 +1,44 @@
+<section id="attention" data-transition="fade" style="background:#F6F3EA;color:#17203A;font-family:'IBM Plex Sans', Arial, sans-serif;padding:96px 128px 160px;display:flex;flex-direction:column;gap:32px">
+<div style="display:flex;flex-direction:column;gap:12px">
+<p style="font-size:24px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#0B6465">The improvement: attention</p>
+<h2 style="font-size:64px;font-weight:600;line-height:1.1">The decoder looks back at every input word</h2>
+</div>
+<div style="display:flex;gap:32px;align-items:flex-start">
+<div style="flex:1.25;display:flex;flex-direction:column;gap:20px">
+<div style="display:flex;gap:24px;align-items:flex-start;background:#FBFAF5;border:1px solid #DDD7C6;border-radius:16px;padding:24px">
+<div style="width:56px;height:56px;flex:none;display:flex;align-items:center;justify-content:center;background:#0B6465;border-radius:50%"><p style="font-size:30px;font-weight:600;color:#F6F3EA">1</p></div>
+<div style="flex:1;display:flex;flex-direction:column;gap:8px">
+<h3 style="font-size:34px;font-weight:600;line-height:1.2">Score</h3>
+<p style="font-size:26px;line-height:1.4;color:#4B5568">How relevant is each input word to the next output token?</p>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;line-height:1.4">score = v^T tanh(W_s s + W_h h_i)</p>
+</div>
+</div>
+<div style="display:flex;gap:24px;align-items:flex-start;background:#FBFAF5;border:1px solid #DDD7C6;border-radius:16px;padding:24px">
+<div style="width:56px;height:56px;flex:none;display:flex;align-items:center;justify-content:center;background:#0B6465;border-radius:50%"><p style="font-size:30px;font-weight:600;color:#F6F3EA">2</p></div>
+<div style="flex:1;display:flex;flex-direction:column;gap:8px">
+<h3 style="font-size:34px;font-weight:600;line-height:1.2">Weights</h3>
+<p style="font-size:26px;line-height:1.4;color:#4B5568">Softmax over the input positions. Padding gets zero weight.</p>
+</div>
+</div>
+<div style="display:flex;gap:24px;align-items:flex-start;background:#FBFAF5;border:1px solid #DDD7C6;border-radius:16px;padding:24px">
+<div style="width:56px;height:56px;flex:none;display:flex;align-items:center;justify-content:center;background:#0B6465;border-radius:50%"><p style="font-size:30px;font-weight:600;color:#F6F3EA">3</p></div>
+<div style="flex:1;display:flex;flex-direction:column;gap:8px">
+<h3 style="font-size:34px;font-weight:600;line-height:1.2">Context</h3>
+<p style="font-size:26px;line-height:1.4;color:#4B5568">Weighted sum of the encoder states, fed to the LSTM and to the output layer.</p>
+</div>
+</div>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:24px">
+<div style="display:flex;flex-direction:column;gap:12px;background:#F8E8C2;border:1px solid #E6CF98;border-radius:16px;padding:32px">
+<h3 style="font-size:34px;font-weight:600;line-height:1.2">Why one vector is not enough</h3>
+<p style="font-size:28px;line-height:1.4">Without attention, 256 numbers must carry the whole description, and every regex token depends on that single summary.</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px;background:#DCEDEA;border:1px solid #B9D8D4;border-radius:16px;padding:32px">
+<p style="font-size:72px;font-weight:600;line-height:1.1;color:#0B6465">20% vs 0%</p>
+<p style="font-size:28px;line-height:1.4">validation exact match after 2 epochs, with and without attention</p>
+</div>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1200px;font-size:24px;color:#5A6275">6  ·  Attention</p>
+<aside>Our one planned improvement is additive attention. At each decoding step, the decoder state is compared with every encoder state to get a score, the scores are turned into weights with a softmax, and the weighted sum becomes a context vector that is used both as an extra LSTM input and in the output layer. Padding positions are masked out. The motivation is the bottleneck of a single fixed-size vector. The number on the right is concrete evidence from the logs: after two epochs the attention model already gets 20 percent of validation regexes exactly right, while the baseline is still at zero.</aside>
+</section>

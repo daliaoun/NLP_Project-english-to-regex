@@ -1,0 +1,33 @@
+<section id="metrics" data-transition="fade" style="background:#F6F3EA;color:#17203A;font-family:'IBM Plex Sans', Arial, sans-serif;padding:96px 128px 160px;display:flex;flex-direction:column;gap:32px">
+<div style="display:flex;flex-direction:column;gap:12px">
+<p style="font-size:24px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#0B6465">Evaluation</p>
+<h2 style="font-size:64px;font-weight:600;line-height:1.1">Exact match is strict, so we also test behaviour</h2>
+</div>
+<div style="display:flex;flex-direction:column;gap:24px">
+<div style="display:flex;gap:24px">
+<div style="flex:1;display:flex;flex-direction:column;gap:8px;background:#FBFAF5;border:1px solid #DDD7C6;border-radius:16px;padding:28px">
+<h3 style="font-size:34px;font-weight:600;line-height:1.2;color:#0B6465">Exact match</h3>
+<p style="font-size:26px;line-height:1.4;color:#4B5568">The generated string is identical to the reference. Strict: equivalent regexes written differently count as wrong.</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:8px;background:#FBFAF5;border:1px solid #DDD7C6;border-radius:16px;padding:28px">
+<h3 style="font-size:34px;font-weight:600;line-height:1.2;color:#0B6465">Functional accuracy</h3>
+<p style="font-size:26px;line-height:1.4;color:#4B5568">Same behaviour: same accept and reject decisions as the reference on about 600 probe strings, using our own matcher for the &amp; and ~ operators.</p>
+</div>
+</div>
+<div style="display:flex;gap:24px">
+<div style="flex:1;display:flex;flex-direction:column;gap:8px;background:#FBFAF5;border:1px solid #DDD7C6;border-radius:16px;padding:28px">
+<h3 style="font-size:34px;font-weight:600;line-height:1.2;color:#0B6465">BLEU-4</h3>
+<p style="font-size:26px;line-height:1.4;color:#4B5568">N-gram overlap on regex tokens. Smooth, so it rewards near misses.</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:8px;background:#FBFAF5;border:1px solid #DDD7C6;border-radius:16px;padding:28px">
+<h3 style="font-size:34px;font-weight:600;line-height:1.2;color:#0B6465">Perplexity and token accuracy</h3>
+<p style="font-size:26px;line-height:1.4;color:#4B5568">Teacher-forced diagnostics that compare models independently of decoding.</p>
+</div>
+</div>
+</div>
+<div style="background:#F8E8C2;border:1px solid #E6CF98;border-radius:16px;padding:24px 28px">
+<p style="font-size:26px;line-height:1.4">Three test sets: new regexes in the training style, 11 held-out phrasing patterns, and 50 handwritten descriptions. The last two measure what a template-trained model cannot simply memorise.</p>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1200px;font-size:24px;color:#5A6275">10  ·  Evaluation</p>
+<aside>One metric is not enough for this task. Exact match is the strictest, but many regexes are equivalent while written differently, so we added functional accuracy: a generated regex counts as correct if it accepts and rejects the same probe strings as the reference. Python’s own regex module cannot evaluate the intersection and complement operators of this dataset, so we wrote a small matcher. This is a sampling test, not a proof of equivalence. Because the generator writes one canonical regex per meaning, exact match is meaningful here, and we use the behavioural score as a second view. The key design choice is the three test sets: an in-distribution score alone would say little about a model trained on generated sentences.</aside>
+</section>

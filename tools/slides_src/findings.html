@@ -1,0 +1,30 @@
+<section id="findings" data-transition="fade" style="background:#F6F3EA;color:#17203A;font-family:'IBM Plex Sans', Arial, sans-serif;padding:96px 128px 160px;display:flex;flex-direction:column;gap:32px">
+<div style="display:flex;flex-direction:column;gap:12px">
+<p style="font-size:24px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#0B6465">What we learned</p>
+<h2 style="font-size:64px;font-weight:600;line-height:1.1">Attention matters most, new wording is the hard part</h2>
+</div>
+<div style="display:flex;flex-direction:column;gap:14px">
+<div style="display:flex;align-items:center;gap:32px;background:#DCEDEA;border:1px solid #B9D8D4;border-radius:16px;padding:16px 28px">
+<p style="font-size:52px;font-weight:600;line-height:1.1;width:330px;flex:none;color:#0B6465">6 of 7</p>
+<p style="font-size:26px;line-height:1.4;flex:1">baseline errors on new regexes removed by attention, against a baseline trained twice as long (4.4% wrong down to 0.6%)</p>
+</div>
+<div style="display:flex;align-items:center;gap:32px;background:#DCEDEA;border:1px solid #B9D8D4;border-radius:16px;padding:16px 28px">
+<p style="font-size:52px;font-weight:600;line-height:1.1;width:330px;flex:none;color:#0B6465">92.5%</p>
+<p style="font-size:26px;line-height:1.4;flex:1">30-epoch baseline on AND combinations, against 99.4% with attention: one vector struggles to carry two or three conditions</p>
+</div>
+<div style="display:flex;align-items:center;gap:32px;background:#DCEDEA;border:1px solid #B9D8D4;border-radius:16px;padding:16px 28px">
+<p style="font-size:52px;font-weight:600;line-height:1.1;width:330px;flex:none;color:#0B6465">1 vs 7</p>
+<p style="font-size:26px;line-height:1.4;flex:1">epochs to reach 88% validation exact match, with and without attention</p>
+</div>
+<div style="display:flex;align-items:center;gap:32px;background:#FBFAF5;border:1px solid #DDD7C6;border-radius:16px;padding:16px 28px">
+<p style="font-size:52px;font-weight:600;line-height:1.1;width:330px;flex:none;color:#4B5568">-16.8</p>
+<p style="font-size:26px;line-height:1.4;flex:1">points of exact match for the attention model on held-out phrasings (99.4 to 82.6)</p>
+</div>
+<div style="display:flex;align-items:center;gap:32px;background:#FBFAF5;border:1px solid #DDD7C6;border-radius:16px;padding:16px 28px">
+<p style="font-size:52px;font-weight:600;line-height:1.1;width:330px;flex:none;color:#4B5568">+1.4</p>
+<p style="font-size:26px;line-height:1.4;flex:1">points only over the long baseline on held-out phrasings: there the wording, not the architecture, is the limit</p>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1200px;font-size:24px;color:#5A6275">12  ·  What we learned</p>
+<aside>Four lessons. First, attention removes six out of seven of the baseline's errors on new regexes, even when the baseline is trained twice as long. Second, the baseline's errors are concentrated in combinations of conditions, which is exactly the bottleneck attention addresses: a single vector must carry two or three conditions with their literals and numbers. Third, attention also trains much faster. Fourth, and most important for honesty: on sentence patterns the model never saw, it loses about seventeen points. And on that harder test the long baseline is only 1.4 points behind, so what limits both models there is what they learned from the templates. Beam search, by the way, does not change the attention model's outputs.</aside>
+</section>

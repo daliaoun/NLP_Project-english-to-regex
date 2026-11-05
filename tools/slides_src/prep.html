@@ -1,0 +1,36 @@
+<section id="prep" data-transition="fade" style="background:#F6F3EA;color:#17203A;font-family:'IBM Plex Sans', Arial, sans-serif;padding:96px 128px 160px;display:flex;flex-direction:column;gap:30px">
+<div style="display:flex;flex-direction:column;gap:12px">
+<p style="font-size:24px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#0B6465">Preprocessing</p>
+<h2 style="font-size:64px;font-weight:600;line-height:1.1">Quoted words become slots, so any word works</h2>
+</div>
+<div style="display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;align-items:center;gap:20px">
+<p style="font-size:24px;color:#4B5568;width:190px;flex:none">Description</p>
+<div style="flex:1;background:#FBFAF5;border:1px solid #DDD7C6;border-radius:14px;padding:16px 24px"><p style="font-size:30px">lines where ‘red’ comes before ‘blue’</p></div>
+</div>
+<div style="display:flex;align-items:center;gap:20px">
+<p style="font-size:24px;color:#4B5568;width:190px;flex:none">Model input</p>
+<div style="flex:1;background:#DCEDEA;border:1px solid #B9D8D4;border-radius:14px;padding:16px 24px"><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:28px">lines where __w0__ comes before __w1__</p></div>
+</div>
+<div style="display:flex;align-items:center;gap:20px">
+<p style="font-size:24px;color:#4B5568;width:190px;flex:none">Model output</p>
+<div style="flex:1;background:#DCEDEA;border:1px solid #B9D8D4;border-radius:14px;padding:16px 24px"><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:28px">.*__w0__.*__w1__.*</p></div>
+</div>
+<div style="display:flex;align-items:center;gap:20px">
+<p style="font-size:24px;color:#4B5568;width:190px;flex:none">Final regex</p>
+<div style="flex:1;background:#17203A;border-radius:14px;padding:16px 24px"><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:28px;color:#F2B544">.*red.*blue.*</p></div>
+</div>
+</div>
+<div style="display:flex;gap:24px">
+<div style="flex:1;display:flex;flex-direction:column;gap:6px;background:#FBFAF5;border:1px solid #DDD7C6;border-radius:16px;padding:24px">
+<h3 style="font-size:30px;font-weight:600;color:#0B6465">Input side</h3>
+<p style="font-size:24px;line-height:1.4;color:#4B5568">lowercase, word tokens, 198-word vocabulary from training only, &lt;PAD&gt; and &lt;UNK&gt;</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:6px;background:#FBFAF5;border:1px solid #DDD7C6;border-radius:16px;padding:24px">
+<h3 style="font-size:30px;font-weight:600;color:#0B6465">Output side</h3>
+<p style="font-size:24px;line-height:1.4;color:#4B5568">one token per regex character, slots as single tokens, 44 tokens, &lt;SOS&gt; and &lt;EOS&gt;</p>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1200px;font-size:24px;color:#5A6275">6  ·  Preprocessing</p>
+<aside>Literal text is the one thing the model cannot know in advance, since a user can ask for any word. So before the model sees a description, every quoted literal is replaced by a numbered slot, in order of appearance. The model learns to put the slots in the right place in the regex, and afterwards we put the real words back, escaping special characters. The rest is standard: lowercase word tokens with a vocabulary built from the training split only, and character-level regex tokens with the four special tokens required by the course.</aside>
+</section>

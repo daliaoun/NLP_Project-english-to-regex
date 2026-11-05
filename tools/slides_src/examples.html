@@ -1,0 +1,43 @@
+<section id="examples" data-transition="fade" style="background:#F6F3EA;color:#17203A;font-family:'IBM Plex Sans', Arial, sans-serif;padding:96px 128px 160px;display:flex;flex-direction:column;gap:32px">
+<div style="display:flex;flex-direction:column;gap:12px">
+<p style="font-size:24px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#0B6465">Generated examples, attention model</p>
+<h2 style="font-size:64px;font-weight:600;line-height:1.1">What it gets right and what it gets wrong</h2>
+</div>
+<div style="display:flex;gap:32px;align-items:flex-start">
+<div style="flex:1;display:flex;flex-direction:column;gap:16px">
+<h3 style="font-size:36px;font-weight:600;line-height:1.2;color:#0B6465">Correct</h3>
+<div style="display:flex;flex-direction:column;gap:10px;background:#DCEDEA;border:1px solid #B9D8D4;border-radius:16px;padding:18px 24px">
+<p style="font-size:24px;line-height:1.35">a regular expression for text lines that have exactly 20 characters and are longer than 3 characters</p>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:25px;font-weight:600">(.{20})&amp;(~(.{0,3}))</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px;background:#DCEDEA;border:1px solid #B9D8D4;border-radius:16px;padding:18px 24px">
+<p style="font-size:24px;line-height:1.35">I want all strings where ‘table’ is repeated 4 times in a row and the length is at least 9 <em>(new phrasing)</em></p>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:25px;font-weight:600">(.*(table){4,}.*)&amp;(.{9,})</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px;background:#DCEDEA;border:1px solid #B9D8D4;border-radius:16px;padding:18px 24px">
+<p style="font-size:24px;line-height:1.35">lines where ‘blue’ comes somewhere after ‘red’ <em>(handwritten)</em></p>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:25px;font-weight:600">.*red.*blue.*</p>
+</div>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:16px">
+<h3 style="font-size:36px;font-weight:600;line-height:1.2;color:#7A4B00">Wrong (reference vs generated)</h3>
+<div style="display:flex;flex-direction:column;gap:6px;background:#F8E8C2;border:1px solid #E6CF98;border-radius:16px;padding:18px 24px">
+<p style="font-size:24px;line-height:1.35">… have the sequence “Alice” at the end but do not contain a space <em>(new phrasing)</em></p>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:23px;line-height:1.4">ref  (.*Alice)&amp;(~(.* .*))</p>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:23px;line-height:1.4">out  (Alice.*)&amp;(~(.* .*))</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:6px;background:#F8E8C2;border:1px solid #E6CF98;border-radius:16px;padding:18px 24px">
+<p style="font-size:24px;line-height:1.35">… contain the substring ‘zero’ no fewer than three times … <em>(new phrasing)</em></p>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:23px;line-height:1.4">ref  ((.*zero){3,}.*)&amp;…</p>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:23px;line-height:1.4">out  (~((.*zero){3,}.*))&amp;…</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:6px;background:#F8E8C2;border:1px solid #E6CF98;border-radius:16px;padding:18px 24px">
+<p style="font-size:24px;line-height:1.35">lines with no digits at all <em>(handwritten)</em></p>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:23px;line-height:1.4">ref  ~(.*[0-9].*)</p>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:23px;line-height:1.4">out  .{0,9}</p>
+</div>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1200px;font-size:24px;color:#5A6275">15  ·  Examples</p>
+<aside>Left: three exact matches, one in the training style, one with a held-out sentence pattern and one handwritten, where the model also has to reorder the two literals. Right: three failures, and they are instructive. Have Alice at the end is a held-out construction, and the model reads it as starts with. No fewer than three times contains the words fewer than, and the model follows them, flipping the meaning. No digits at all uses a negation the generator never produces. In every case the output is a valid regex that means something else.</aside>
+</section>

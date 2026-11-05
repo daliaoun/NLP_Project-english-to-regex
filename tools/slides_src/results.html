@@ -1,0 +1,20 @@
+<section id="results" data-transition="fade" style="background:#F6F3EA;color:#17203A;font-family:'IBM Plex Sans', Arial, sans-serif;padding:96px 128px 160px;display:flex;flex-direction:column;gap:32px">
+<div style="display:flex;flex-direction:column;gap:12px">
+<p style="font-size:24px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#0B6465">Results, greedy decoding</p>
+<h2 style="font-size:64px;font-weight:600;line-height:1.1">Near perfect on new regexes, harder on new wording</h2>
+</div>
+<table style="font-size:29px">
+<tr><th style="width:25%">Exact match (%)</th><th style="width:9%;text-align:right">n</th><th style="width:22%;text-align:right">Baseline, 15 epochs</th><th style="width:22%;text-align:right">Baseline, 30 epochs</th><th style="width:22%;text-align:right">Attention, 15 max</th></tr>
+<tr><td>New regexes</td><td style="text-align:right">1,884</td><td style="text-align:right">92.4</td><td style="text-align:right">95.6</td><td style="text-align:right;font-weight:600;color:#0B6465">99.4</td></tr>
+<tr><td>New phrasings</td><td style="text-align:right">1,500</td><td style="text-align:right">75.1</td><td style="text-align:right">81.2</td><td style="text-align:right;font-weight:600;color:#0B6465">82.6</td></tr>
+<tr><td>Handwritten</td><td style="text-align:right">50</td><td style="text-align:right">94.0</td><td style="text-align:right">92.0</td><td style="text-align:right;font-weight:600;color:#0B6465">96.0</td></tr>
+</table>
+<div style="display:flex;gap:24px">
+<div style="flex:1;display:flex;flex-direction:column;gap:8px;background:#FBFAF5;border:1px solid #DDD7C6;border-radius:16px;padding:24px 28px"><p style="font-size:24px;color:#4B5568">Second attention seed</p><p style="font-size:30px;font-weight:600">99.7 / 83.3 / 96.0</p></div>
+<div style="flex:1;display:flex;flex-direction:column;gap:8px;background:#FBFAF5;border:1px solid #DDD7C6;border-radius:16px;padding:24px 28px"><p style="font-size:24px;color:#4B5568">Valid regexes</p><p style="font-size:30px;font-weight:600">99.6 to 100% everywhere</p></div>
+<div style="flex:1;display:flex;flex-direction:column;gap:8px;background:#FBFAF5;border:1px solid #DDD7C6;border-radius:16px;padding:24px 28px"><p style="font-size:24px;color:#4B5568">First version, NL-RX</p><p style="font-size:30px;font-weight:600">45.3% exact, same model</p></div>
+</div>
+<p style="font-size:26px;line-height:1.4;color:#4B5568">Exact = identical to the reference. Behaviour-based scores are 0 to 2 points higher (report, section 7). No test regex of the first two sets appears in training.</p>
+<p style="position:absolute;left:128px;bottom:64px;width:1200px;font-size:24px;color:#5A6275">11  ·  Results</p>
+<aside>This is the main table. On regexes the model has never seen, written in the training style, the attention model is almost perfect: 99.4 percent exact. The baseline without attention is at 92.4 after the same 15 epochs, and 95.6 when trained twice as long. The interesting rows are the harder tests. On sentence patterns held out of training, exact match drops to 82.6 percent; there the long baseline is close behind at 81.2, so attention helps much less with new wording. On fifty handwritten descriptions the attention model gets 48 right; with fifty examples, one example is two points. For comparison, the same architecture on the original NL-RX data reached 45 percent, but most of that gap comes from the labels, not the model.</aside>
+</section>

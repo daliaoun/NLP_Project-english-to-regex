@@ -1,0 +1,19 @@
+{
+  "mode": "greedy",
+  "n": 999,
+  "exact_match": 0.34134134134134136,
+  "bleu": 82.33327099535916,
+  "functional_acc": 0.5635635635635635,
+  "valid_rate": 0.997997997997998,
+  "n_nondegenerate_ref": 753,
+  "functional_acc_nondegenerate": 0.5073041168658698,
+  "em_nondegenerate": 0.32669322709163345,
+  "loss": 0.1988797925436767,
+  "perplexity": 1.2200352997448594,
+  "token_acc": 0.9501618122977347,
+  "n_unseen_target": 944,
+  "n_seen_target": 55,
+  "em_unseen_target": 0.3411016949152542,
+  "func_unseen_target": 0.5677966101694916,
+  "em_seen_target": 0.34545454545454546
+}

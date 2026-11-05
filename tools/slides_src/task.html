@@ -1,0 +1,26 @@
+<section id="task" data-transition="fade" style="background:#F6F3EA;color:#17203A;font-family:'IBM Plex Sans', Arial, sans-serif;padding:96px 128px 160px;display:flex;flex-direction:column;gap:32px">
+<div style="display:flex;flex-direction:column;gap:12px">
+<p style="font-size:24px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#0B6465">The task</p>
+<h2 style="font-size:64px;font-weight:600;line-height:1.1">Describe the lines in English, get the regex</h2>
+</div>
+<div style="display:flex;flex-direction:column;gap:24px">
+<div style="display:flex;align-items:center;gap:24px">
+<div style="flex:1.3;background:#FBFAF5;border:1px solid #DDD7C6;border-radius:16px;padding:28px 32px"><p style="font-size:30px;line-height:1.35">lines where ‘red’ comes before ‘blue’</p></div>
+<x-shape kind="arrow-right" style="width:64px;height:32px;background:#0B6465"></x-shape>
+<div style="flex:1;background:#17203A;border-radius:16px;padding:28px 32px"><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:30px;color:#F2B544">.*red.*blue.*</p></div>
+</div>
+<div style="display:flex;align-items:center;gap:24px">
+<div style="flex:1.3;background:#FBFAF5;border:1px solid #DDD7C6;border-radius:16px;padding:28px 32px"><p style="font-size:30px;line-height:1.35">lines that start with a capital letter and end with a number</p></div>
+<x-shape kind="arrow-right" style="width:64px;height:32px;background:#0B6465"></x-shape>
+<div style="flex:1;background:#17203A;border-radius:16px;padding:28px 32px"><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:30px;color:#F2B544">([A-Z].*)&amp;(.*[0-9])</p></div>
+</div>
+<div style="display:flex;align-items:center;gap:24px">
+<div style="flex:1.3;background:#FBFAF5;border:1px solid #DDD7C6;border-radius:16px;padding:28px 32px"><p style="font-size:30px;line-height:1.35">lines that contain ‘error’ and do not contain ‘warning’</p></div>
+<x-shape kind="arrow-right" style="width:64px;height:32px;background:#0B6465"></x-shape>
+<div style="flex:1;background:#17203A;border-radius:16px;padding:28px 32px"><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:30px;color:#F2B544">(.*error.*)&amp;(~(.*warning.*))</p></div>
+</div>
+</div>
+<p style="font-size:28px;line-height:1.4;color:#4B5568">A sequence-to-sequence problem: one token sequence in, another out. The regex has to match whole lines, &amp; means and, ~ means not, and the model has no pretrained weights.</p>
+<p style="position:absolute;left:128px;bottom:64px;width:1200px;font-size:24px;color:#5A6275">2  ·  The task</p>
+<aside>Three outputs of the final model, all exactly right. The input is a plain English description of the lines to match, and the output is a regular expression that must match the whole line. The dialect has two operators that ordinary regular expressions lack: ampersand for and, tilde for not. They make combinations of conditions easy to write, and our own matcher can run them.</aside>
+</section>

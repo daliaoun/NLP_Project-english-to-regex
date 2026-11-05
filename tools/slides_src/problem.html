@@ -1,0 +1,24 @@
+<section id="problem" data-transition="fade" style="background:#F6F3EA;color:#17203A;font-family:'IBM Plex Sans', Arial, sans-serif;padding:96px 128px 160px;display:flex;flex-direction:column;gap:32px">
+<div style="display:flex;flex-direction:column;gap:12px">
+<p style="font-size:24px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#0B6465">Why a new dataset</p>
+<h2 style="font-size:64px;font-weight:600;line-height:1.1">In the standard benchmark, English and regex can disagree</h2>
+</div>
+<div style="display:flex;align-items:center;gap:24px">
+<div style="flex:1.2;background:#FBFAF5;border:1px solid #DDD7C6;border-radius:16px;padding:28px 32px;display:flex;flex-direction:column;gap:8px"><p style="font-size:22px;color:#4B5568">NL-RX description</p><p style="font-size:32px;line-height:1.35">lines with the string ‘dog’ at least 2 times</p></div>
+<x-shape kind="arrow-right" style="width:64px;height:32px;background:#0B6465"></x-shape>
+<div style="flex:1;background:#17203A;border-radius:16px;padding:28px 32px;display:flex;flex-direction:column;gap:8px"><p style="font-size:22px;color:#B7C0D0">NL-RX label</p><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:34px;color:#F2B544">.*(dog){2,}.*</p></div>
+</div>
+<div style="display:flex;gap:24px">
+<div style="flex:1;display:flex;flex-direction:column;gap:8px;background:#FBFAF5;border:1px solid #DDD7C6;border-radius:16px;padding:28px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:34px;font-weight:600;color:#0B6465">dogdog</p>
+<p style="font-size:26px;line-height:1.4;color:#4B5568">accepted: two copies side by side</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:8px;background:#F8E8C2;border:1px solid #E6CF98;border-radius:16px;padding:28px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:34px;font-weight:600;color:#7A4B00">dog and dog</p>
+<p style="font-size:26px;line-height:1.4">rejected, although it contains ‘dog’ twice</p>
+</div>
+</div>
+<p style="font-size:28px;line-height:1.4;color:#4B5568">The model learned this label faithfully, so a correct output looked wrong to a human reader. The templated version of the dataset (NL-RX-Synth) has the same convention. Our first model scored 45.3% exact match on this data.</p>
+<p style="position:absolute;left:128px;bottom:64px;width:1200px;font-size:24px;color:#5A6275">3  ·  Why a new dataset</p>
+<aside>We started with the standard dataset, NL-RX, and got 45 percent exact match. Looking at the outputs we found that some labels do not mean what the English says. Here the description says the string dog at least two times, but the label only accepts two adjacent copies, so a line like dog and dog is rejected. The model reproduced the label exactly, which is correct by the benchmark and wrong for a person. Rather than train on labels we could not trust, we built a dataset where every label is checked.</aside>
+</section>

@@ -1,0 +1,14 @@
+<section id="curves" data-transition="fade" style="background:#F6F3EA;color:#17203A;font-family:'IBM Plex Sans', Arial, sans-serif;padding:96px 128px 160px;display:flex;flex-direction:column;gap:32px">
+<div style="display:flex;flex-direction:column;gap:12px">
+<p style="font-size:24px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#0B6465">Training curves</p>
+<h2 style="font-size:64px;font-weight:600;line-height:1.1">Attention converges in a few epochs, the baseline slowly</h2>
+</div>
+<img src="img/learning_curves.png" alt="Three line charts over training epochs for the baseline and the attention model: training and validation loss, validation exact match and validation BLEU-4. The attention models reach 89 to 94% exact match after one epoch; the baseline climbs over about ten epochs." style="width:1664px;height:458px;object-fit:contain;background:#FFFFFF;border:1px solid #DDD7C6;border-radius:12px">
+<div style="display:flex;gap:24px">
+<div style="flex:1;background:#DCEDEA;border:1px solid #B9D8D4;border-radius:16px;padding:20px 24px"><p style="font-size:26px;line-height:1.35">After 2 epochs: 20% validation exact match with attention, 0% without.</p></div>
+<div style="flex:1;background:#FBFAF5;border:1px solid #DDD7C6;border-radius:16px;padding:20px 24px"><p style="font-size:26px;line-height:1.35">The baseline overfits more: loss gap of 0.15 after 60 epochs.</p></div>
+<div style="flex:1;background:#FBFAF5;border:1px solid #DDD7C6;border-radius:16px;padding:20px 24px"><p style="font-size:26px;line-height:1.35">Attention: validation loss flat after about 10 epochs, gap 0.06 to 0.09.</p></div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1200px;font-size:24px;color:#5A6275">13  ·  Training curves</p>
+<aside>Left: dashed lines are training loss, solid lines validation loss. Middle: validation exact match per epoch. Right: validation BLEU. The attention model is at 89 percent exact match after one epoch and above 99 percent after four. The baseline climbs over about ten epochs, reaches 94 percent at epoch 14 and 96 percent at epoch 28. The 15-epoch baseline is the first half of the same run, so its curve is hidden under the longer one. Training and validation losses stay close for both models, so there is no sign of overfitting on this data; validation loss is even lower than training loss because dropout is only active during training.</aside>
+</section>

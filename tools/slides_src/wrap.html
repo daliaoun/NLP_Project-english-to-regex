@@ -1,0 +1,23 @@
+<section id="wrap" data-transition="fade" style="background:#F2B544;color:#17203A;font-family:'IBM Plex Sans', Arial, sans-serif;padding:96px 128px 160px;display:flex;flex-direction:column;justify-content:space-between">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-size:24px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#17203A">Conclusion</p>
+<h1 style="font-size:88px;font-weight:600;line-height:1.1;color:#17203A">Verified data, then attention: a small LSTM writes regexes from English</h1>
+</div>
+<div style="display:flex;gap:24px">
+<div style="flex:1;display:flex;flex-direction:column;gap:8px;background:#111A2C;border-radius:16px;padding:32px">
+<p style="font-size:64px;font-weight:600;line-height:1.1;color:#F2B544">99.4%</p>
+<p style="font-size:26px;line-height:1.4;color:#F1EEE5">exact match on regexes never seen in training (95.6% without attention, trained twice as long)</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:8px;background:#111A2C;border-radius:16px;padding:32px">
+<p style="font-size:64px;font-weight:600;line-height:1.1;color:#F2B544">82.6%</p>
+<p style="font-size:26px;line-height:1.4;color:#F1EEE5">exact match on sentence patterns held out of training, 48 of 50 handwritten</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:8px;background:#111A2C;border-radius:16px;padding:32px">
+<p style="font-size:64px;font-weight:600;line-height:1.1;color:#F2B544">Next</p>
+<p style="font-size:26px;line-height:1.4;color:#F1EEE5">more varied training language, especially for negation</p>
+</div>
+</div>
+<p style="font-size:44px;font-weight:600;color:#17203A">Questions?</p>
+<p style="position:absolute;left:128px;bottom:64px;width:1200px;font-size:24px;color:#17203A">19  ·  Conclusion</p>
+<aside>To close. The first lesson is about data: on a benchmark whose labels sometimes contradict their English, the same model looked mediocre; with verified labels it learns the task. The second is about the model: attention removes nine out of ten errors and trains much faster. The third is about evaluation: an in-distribution score of 99 percent says little on its own, so we tested on held-out sentence patterns and handwritten descriptions, where the model is at 83 and 96 percent. New wording, especially negation, is the next thing to work on. Thank you, happy to take questions.</aside>
+</section>

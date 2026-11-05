@@ -1,0 +1,17 @@
+<section id="heatmap" data-transition="fade" style="background:#F6F3EA;color:#17203A;font-family:'IBM Plex Sans', Arial, sans-serif;padding:96px 128px 160px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:12px">
+<p style="font-size:24px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#0B6465">Attention heatmaps</p>
+<h2 style="font-size:64px;font-weight:600;line-height:1.1">Each regex token looks at the words that justify it</h2>
+</div>
+<div style="display:flex;gap:40px;align-items:center">
+<img src="img/attention_examples.png" alt="Four attention heatmaps. Rows are generated regex tokens, columns are input words. The count 3 attends to the word 3, each literal slot attends to its quoted word, the tilde attends to not, the vowel class attends to vowel, and for blue somewhere after red the model writes red first." style="width:980px;height:660px;object-fit:contain;background:#FFFFFF;border:1px solid #DDD7C6;border-radius:12px">
+<div style="flex:1;display:flex;flex-direction:column;gap:22px">
+<div style="display:flex;flex-direction:column;gap:4px"><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:28px;font-weight:600;color:#0B6465">3</p><p style="font-size:26px;color:#4B5568">the word “3”, then “least” and “times” for the braces</p></div>
+<div style="display:flex;flex-direction:column;gap:4px"><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:28px;font-weight:600;color:#0B6465">‘cat’, ‘the’</p><p style="font-size:26px;color:#4B5568">each slot looks at its quoted word</p></div>
+<div style="display:flex;flex-direction:column;gap:4px"><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:28px;font-weight:600;color:#0B6465">~ and &amp;</p><p style="font-size:26px;color:#4B5568">the words “not” and “and”</p></div>
+<div style="display:flex;flex-direction:column;gap:4px"><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:28px;font-weight:600;color:#0B6465">.*red.*blue.*</p><p style="font-size:26px;color:#4B5568">“blue somewhere after red”: red is written first, so the decoder reads the sentence from the end</p></div>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1200px;font-size:24px;color:#5A6275">14  ·  Attention heatmaps</p>
+<aside>Each panel is one description. Rows are the regex tokens the model generated, columns are the input words, and brighter means more attention. The count attends to the number in the sentence; each literal slot attends to its quoted word; the tilde attends to not, the ampersand to and; the vowel class attends to vowel. The bottom right panel is the most telling: the sentence mentions blue first, but the regex must start with red, and the decoder indeed looks at the last word first. That reordering is impossible to do well with a single summary vector.</aside>
+</section>

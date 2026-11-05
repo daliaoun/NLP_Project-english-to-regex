@@ -1,0 +1,31 @@
+<section id="dataset" data-transition="fade" style="background:#F6F3EA;color:#17203A;font-family:'IBM Plex Sans', Arial, sans-serif;padding:96px 128px 160px;display:flex;flex-direction:column;gap:32px">
+<div style="display:flex;flex-direction:column;gap:12px">
+<p style="font-size:24px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#0B6465">Dataset: NL-RX-Turk</p>
+<h2 style="font-size:64px;font-weight:600;line-height:1.1">10,000 descriptions paired with regexes</h2>
+</div>
+<div style="display:flex;gap:24px">
+<div style="flex:1;display:flex;flex-direction:column;gap:8px;background:#FBFAF5;border:1px solid #DDD7C6;border-radius:16px;padding:32px">
+<p style="font-size:80px;font-weight:600;line-height:1.1;color:#0B6465">9,999</p>
+<p style="font-size:28px;line-height:1.35;color:#4B5568">unique pairs after removing one duplicate</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:8px;background:#FBFAF5;border:1px solid #DDD7C6;border-radius:16px;padding:32px">
+<p style="font-size:80px;font-weight:600;line-height:1.1;color:#0B6465">94.5%</p>
+<p style="font-size:28px;line-height:1.35;color:#4B5568">of test regexes never appear in training</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:8px;background:#FBFAF5;border:1px solid #DDD7C6;border-radius:16px;padding:32px">
+<p style="font-size:80px;font-weight:600;line-height:1.1;color:#0B6465">467 / 43</p>
+<p style="font-size:28px;line-height:1.35;color:#4B5568">source words and target tokens in the vocabularies</p>
+</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:12px">
+<p style="font-size:28px;color:#4B5568">Random split, seed 42: train, validation, test</p>
+<div style="display:flex;gap:4px">
+<div style="flex:8001;display:flex;align-items:center;background:#0B6465;border-radius:12px;padding:20px 24px"><p style="font-size:28px;font-weight:600;color:#F6F3EA">Train 8,001</p></div>
+<div style="flex:999;display:flex;align-items:center;background:#F2B544;border-radius:12px;padding:20px 12px"><p style="font-size:26px;font-weight:600;color:#17203A">Val 999</p></div>
+<div style="flex:999;display:flex;align-items:center;background:#8CC3BF;border-radius:12px;padding:20px 12px"><p style="font-size:26px;font-weight:600;color:#17203A">Test 999</p></div>
+</div>
+</div>
+<p style="font-size:26px;line-height:1.4;color:#4B5568">Source: Locascio et al., 2016, github.com/nicholaslocascio/deep-regex (MIT license). Quoted words in the descriptions (‘dog’, ‘truck’, ‘ring’, ‘lake’) are placeholders shared with the regex.</p>
+<p style="position:absolute;left:128px;bottom:64px;width:1200px;font-size:24px;color:#5A6275">3  ·  Dataset</p>
+<aside>The dataset comes from the original NL-RX work. Each description was paraphrased by a crowd worker from a templated sentence, which makes the language realistic and noisy. Only one pair was a duplicate. The important number is 94.5 percent: nearly all test regexes are new combinations the model has never seen, so the test set measures generalisation, not memorisation. The vocabularies are built on the training split only.</aside>
+</section>

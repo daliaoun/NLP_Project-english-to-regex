@@ -1,0 +1,40 @@
+<section id="errors" data-transition="fade" style="background:#F6F3EA;color:#17203A;font-family:'IBM Plex Sans', Arial, sans-serif;padding:96px 128px 160px;display:flex;flex-direction:column;gap:30px">
+<div style="display:flex;flex-direction:column;gap:12px">
+<p style="font-size:24px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#0B6465">Error analysis, attention model</p>
+<h2 style="font-size:64px;font-weight:600;line-height:1.1">Errors come from wording, not from syntax</h2>
+</div>
+<div style="display:flex;flex-direction:column;gap:14px">
+<p style="font-size:26px;color:#4B5568">Outcome on the 1,500 held-out phrasings</p>
+<div style="display:flex;gap:3px">
+<div style="flex:1239;display:flex;align-items:center;background:#0B6465;border-radius:10px;padding:18px 20px"><p style="font-size:30px;font-weight:600;color:#F6F3EA">1,239</p></div>
+<div style="flex:26;background:#8CC3BF;border-radius:10px"></div>
+<div style="flex:235;display:flex;align-items:center;background:#F2B544;border-radius:10px;padding:18px 20px"><p style="font-size:30px;font-weight:600;color:#17203A">235</p></div>
+</div>
+<div style="display:flex;flex-wrap:wrap;gap:12px 32px">
+<div style="display:flex;align-items:center;gap:10px"><div style="width:24px;height:24px;background:#0B6465;border-radius:6px"></div><p style="font-size:24px">Exact match, 1,239</p></div>
+<div style="display:flex;align-items:center;gap:10px"><div style="width:24px;height:24px;background:#8CC3BF;border-radius:6px"></div><p style="font-size:24px">Equivalent, written differently, 26</p></div>
+<div style="display:flex;align-items:center;gap:10px"><div style="width:24px;height:24px;background:#F2B544;border-radius:6px"></div><p style="font-size:24px">Valid but wrong, 235 (no invalid regex)</p></div>
+</div>
+</div>
+<div style="display:flex;gap:32px;align-items:flex-start">
+<div style="flex:1.2">
+<table style="font-size:26px">
+<tr><th style="width:72%">Type of the 235 wrong outputs</th><th style="width:28%;text-align:right">n</th></tr>
+<tr><td>Structure wrong, mostly a condition read as another (“at the end” as “starts with”)</td><td style="text-align:right">156</td></tr>
+<tr><td>Negation missing or extra (“no fewer than”)</td><td style="text-align:right">68</td></tr>
+<tr><td>Wrong character class</td><td style="text-align:right">8</td></tr>
+<tr><td>Only a number wrong</td><td style="text-align:right">3</td></tr>
+</table>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:12px;background:#F8E8C2;border:1px solid #E6CF98;border-radius:16px;padding:28px">
+<h3 style="font-size:32px;font-weight:600;line-height:1.2">On new regexes: 11 errors</h3>
+<ul style="font-size:25px;line-height:1.4">
+<li>6 are one unseen shape, “ends with X or Y”: the second ending becomes “contains”</li>
+<li>2 hit the 60-token output limit</li>
+<li>3 drop or change a condition in a long sentence</li>
+</ul>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1200px;font-size:24px;color:#5A6275">16  ·  Error analysis</p>
+<aside>On the held-out phrasings, 1,239 of 1,500 outputs are exact and 26 more are equivalent. All 235 wrong outputs are valid regexes, so the syntax is learned; the errors are about meaning. Two thirds have the wrong structure, mostly one condition read as another, typically a held-out construction such as have X at the end read as a construction the model knows. Most of the rest are negations: no fewer than is read as fewer than. On new regexes in the training style only 11 outputs are wrong, and six of them are the same unseen combination, ends with X or Y. The model has learned constructions, not the meaning of each word on its own.</aside>
+</section>

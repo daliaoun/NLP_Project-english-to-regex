@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>NL2Regex technical report</title>
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  <link rel="stylesheet" href="report.css" />
+</head>
+<body>
+<main>
+<h1
+id="from-english-to-regular-expressions-an-encoder-decoder-with-attention-trained-on-a-verified-dataset">From
+English to regular expressions: an encoder-decoder with attention,
+trained on a verified dataset</h1>
+<p>NLP course project, text generation with encoder-decoder
+architectures. Mohamed Ali Aoun. All numbers below come from the code
+and logs in this repository (<code>results/</code>,
+<code>logs/</code>).</p>
+<h2 id="1-introduction">1. Introduction</h2>
+<p><strong>Task.</strong> Natural language to regular expression. The
+input is a short English description of a set of text lines; the output
+is a regular expression that matches exactly those lines (the regex must
+match the whole line).</p>
+<pre><code>lines containing &#39;cat&#39; at least 2 times       -&gt;   (.*cat){2,}.*
+lines containing &#39;cat&#39; 2 times in a row       -&gt;   .*(cat){2,}.*
+lines that start with a capital letter and end with a number   -&gt;   ([A-Z].*)&amp;(.*[0-9])</code></pre>
+<p><strong>Motivation.</strong> Regexes are compact, precise and hard to
+write, while describing the wanted lines in words is easy. The output
+language is small and fully formal, so a generated regex can be checked
+by running it, which allows an evaluation that goes beyond string
+comparison, and failures are easy to interpret.</p>
+<p><strong>Formulation.</strong> Given a source token sequence x = (x_1
+... x_n), generate a target token sequence y = (y_1 ... y_m) by
+maximising p(y | x) = prod_t p(y_t | y_&lt;t, x). Source tokens are
+words; target tokens are regex symbols.</p>
+<p><strong>Contribution in one sentence.</strong> We first trained on
+the standard benchmark (NL-RX) and found that some of its labels
+contradict their English; we therefore built VeriRegex, a generated
+dataset in which every label is verified by an independent
+implementation, and show that an LSTM encoder-decoder with attention
+learns it almost perfectly on new regexes (99.4% exact match) and still
+well on held-out sentence patterns (82.6%) and handwritten descriptions
+(48 of 50).</p>
+<h2 id="2-related-concepts">2. Related concepts</h2>
+<ul>
+<li><strong>Encoder-decoder (Sutskever et al., 2014).</strong> An
+encoder RNN reads the input and compresses it into a state; a decoder
+RNN starts from that state and emits the output one token at a time,
+each step conditioned on the previous token.</li>
+<li><strong>Attention (Bahdanau et al., 2015).</strong> A single
+fixed-size vector must carry the whole sentence, which becomes a
+bottleneck for long or detail-heavy inputs. Attention lets the decoder
+look back at all encoder states at every step and weight them.</li>
+<li><strong>Placeholders for rare tokens.</strong> Copying arbitrary
+literal words through a fixed vocabulary is impossible, so literals are
+replaced by numbered slots before the model sees them and restored
+afterwards (a standard technique in semantic parsing; NL-RX itself uses
+four fixed stand-in words).</li>
+<li><strong>This task in the literature.</strong> Locascio et al. (2016)
+introduced NL-RX (10,000 pairs, crowd paraphrases of templated
+descriptions) and a seq2seq model with attention, reporting 58.2%
+accuracy on NL-RX-Turk and 88.7% on the templated NL-RX-Synth under DFA
+equivalence.</li>
+</ul>
+<h2 id="3-dataset">3. Dataset</h2>
+<h3 id="31-why-we-did-not-keep-nl-rx">3.1 Why we did not keep NL-RX</h3>
+<p>Our first version trained on NL-RX-Turk and reached 45.3% exact match
+and 65.1% functional accuracy (the archived run is in
+<code>results/nlrx_v1/</code>). Inspecting the outputs showed that the
+benchmark's labels do not always mean what the English says. Example
+from the data:</p>
+<pre><code>lines with the string &#39;dog&#39; at least 2 times   -&gt;   .*(dog){2,}.*</code></pre>
+<p>This regex accepts <code>dogdog</code> but rejects
+<code>dog and dog</code>, although that line contains "dog" twice: the
+label means "two adjacent copies". The templated version NL-RX-Synth
+uses the same convention ("lines containing the string 'dog', 2 or more
+times" has the same regex), so the problem is in the original grammar,
+not in the crowd paraphrases. A model trained on such data is graded
+against labels a human reader would call wrong, and its errors become
+hard to interpret. Other public datasets are either very small (KB13,
+about 800 pairs) or much harder to learn without pretraining
+(StructuredRegex, about 3,500 pairs).</p>
+<h3 id="32-veriregex-generated-and-verified">3.2 VeriRegex: generated
+and verified</h3>
+<p>We wrote a generator (<code>src/generate.py</code>) that builds each
+example from one <strong>meaning tree</strong> and derives everything
+else from it:</p>
+<ol type="1">
+<li><strong>Meaning tree.</strong> 13 kinds of condition: contains,
+starts with, ends with, is exactly, at least N times, fewer than N
+times, N times in a row, before, immediately followed by, length at
+least / at most / exactly N, made only of. They apply to a quoted
+literal or to a character type (digit, letter, capital, lowercase,
+vowel, space) and are combined with not, and (two or three conditions)
+and or.</li>
+<li><strong>English.</strong> One description is written from the tree
+by choosing among 216 phrasing templates (verb phrases, participles,
+"where ..." clauses, singular and plural subjects), synonyms ("a digit",
+"a number", "a numeral"), openers ("find", "give me", "a regex for"),
+shared-verb coordination ("contain 'a' and 'b'") and reorderings
+("'blue' somewhere after 'red'"). Literals are drawn from 135 words,
+names, numbers and two-word phrases.</li>
+<li><strong>Regex.</strong> One canonical regex per tree:
+<code>(.*cat){2,}.*</code> for "at least 2 times",
+<code>.*(cat){2,}.*</code> for "2 times in a row",
+<code>(A)&amp;(B)</code>, <code>(A)|(B)</code>, <code>~(A)</code>.</li>
+<li><strong>Verification.</strong> The same tree is also evaluated by a
+plain Python predicate that never looks at the regex (for example
+<code>s.count('cat') &gt;= 2</code>). On about 300 probe strings per
+example (built from the example's literals, their halves, upper-case
+variants, repetitions, random characters and every length from 0 to 22),
+the regex run through our matcher and the predicate must agree on every
+string. <strong>A single disagreement stops the build</strong>; none
+occurred. In addition, an example is kept only if some probe matches and
+some does not, which removes contradictions ("starts with a digit and
+starts with a letter") and tautologies: 5,251 of 47,251 sampled trees
+(11%) were rejected this way.</li>
+</ol>
+<p>The dialect is the one of NL-RX: <code>.</code>, character classes,
+<code>*</code>, <code>+</code>, <code>{n}</code>, <code>{n,}</code>,
+<code>{n,m}</code>, grouping, <code>|</code>, plus <code>&amp;</code>
+(intersection) and <code>~</code> (complement). Python's <code>re</code>
+has neither of the last two, so <code>src/regex_engine.py</code>
+implements a parser and whole-line matcher for the dialect.</p>
+<h3 id="33-splits-and-statistics">3.3 Splits and statistics</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Split</th>
+<th>Pairs</th>
+<th>What it measures</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Train</td>
+<td>37,586</td>
+<td>14,345 distinct regex structures</td>
+</tr>
+<tr class="even">
+<td>Validation</td>
+<td>2,000</td>
+<td>model selection; regexes unseen in training</td>
+</tr>
+<tr class="odd">
+<td>Test: new regexes</td>
+<td>1,884</td>
+<td>new combinations and parameters, in the training style</td>
+</tr>
+<tr class="even">
+<td>Test: new phrasings</td>
+<td>1,500</td>
+<td>11 phrasing patterns never used in training (for example "have X at
+the end", "contain X no fewer than N times", "each line"), on new
+regexes</td>
+</tr>
+<tr class="odd">
+<td>Test: handwritten</td>
+<td>50</td>
+<td>descriptions written by hand, in free wording</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><strong>Split by regex.</strong> After removing duplicate
+(description, regex) pairs, the regex structures (with literals replaced
+by slots) are shuffled and assigned to train, validation or test, so no
+test regex appears in training. Single conditions all go to training, so
+the new-regex test consists of new combinations (1,031 AND, 597 OR, 236
+negations; the 20 remaining single conditions all say "fewer than 5
+capital letters", a condition whose regex happened to be drawn into the
+test split).</li>
+<li><strong>New phrasings.</strong> Generated with the held-out
+templates allowed and kept only if at least one was used, the regex is
+new and the anonymised description is not in training. Most words of
+these patterns occur in training in other combinations; the only unknown
+word is "each" (0.7% of tokens).</li>
+<li><strong>Handwritten.</strong> Fifty descriptions written by hand,
+with their meaning tree written by hand too, so their labels are
+verified like the others. They test wording, not structure: 46 of their
+50 regexes also occur in training. 1.2% of their tokens are unknown
+("word", "whose", "must", "be").</li>
+<li><strong>Lengths (train):</strong> 13.9 source tokens on average (max
+37), 16.9 target tokens (max 67).</li>
+</ul>
+<h2 id="4-preprocessing">4. Preprocessing</h2>
+<table>
+<thead>
+<tr class="header">
+<th>Step</th>
+<th>What we do</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Literal slots</td>
+<td>each quoted span ('cat', "2024", 'ice cream') becomes
+<code>__w0__</code>, <code>__w1__</code>, ... in order of first
+appearance, in the description and in the regex; after decoding, slots
+are replaced by the literals (special characters escaped as
+<code>[.]</code>)</td>
+<td>the model works with any word, including words never seen in
+training</td>
+</tr>
+<tr class="even">
+<td>Normalisation</td>
+<td>lowercase, remaining quotes removed</td>
+<td>smaller vocabulary</td>
+</tr>
+<tr class="odd">
+<td>Source tokenisation</td>
+<td>words (hyphenated words kept whole) and punctuation</td>
+<td>descriptions mix words and punctuation</td>
+</tr>
+<tr class="even">
+<td>Target tokenisation</td>
+<td>one token per regex character; <code>__wK__</code> and
+<code>\b</code> are single tokens</td>
+<td>regex syntax is character-level</td>
+</tr>
+<tr class="odd">
+<td>Vocabularies</td>
+<td>from the training split only; <code>&lt;PAD&gt;</code>=0,
+<code>&lt;UNK&gt;</code>=1, <code>&lt;SOS&gt;</code>=2,
+<code>&lt;EOS&gt;</code>=3</td>
+<td>no information from the test sets</td>
+</tr>
+<tr class="even">
+<td>Padding</td>
+<td>batches padded with <code>&lt;PAD&gt;</code>; packed sequences in
+the encoder, attention masks padded positions, the loss ignores
+<code>&lt;PAD&gt;</code></td>
+<td>variable-length batches</td>
+</tr>
+<tr class="odd">
+<td>Truncation</td>
+<td>at most 40 source and 60 target tokens</td>
+<td>no source is truncated; 11 of 43,020 regexes are longer than 59
+tokens and are cut (see section 9)</td>
+</tr>
+<tr class="even">
+<td>Unknown words</td>
+<td>mapped to <code>&lt;UNK&gt;</code>; 5% of training words are
+randomly replaced by <code>&lt;UNK&gt;</code> (word dropout)</td>
+<td>robustness to unseen words</td>
+</tr>
+</tbody>
+</table>
+<p>Vocabulary sizes: 198 source words, 44 target tokens. Embedding
+dimension 128 for both. Numeric representation: token ids, then a
+learned embedding layer.</p>
+<h2 id="5-proposed-architecture">5. Proposed architecture</h2>
+<p>Implemented in <code>src/models.py</code> with PyTorch layers
+(Embedding, LSTM, Linear) and our own attention, bridge and decoding
+code.</p>
+<ul>
+<li><strong>Encoder:</strong> Embedding(198, 128) -&gt; dropout -&gt;
+LSTM (1 layer, hidden 256).</li>
+<li><strong>Initial decoder state:</strong> the encoder's final (h, c),
+each passed through a linear layer and tanh (the "bridge").</li>
+<li><strong>Decoder, baseline:</strong> Embedding(44, 128) -&gt;
+LSTM(256) -&gt; Linear(256 -&gt; 44) -&gt; softmax. Its only link to the
+input is the initial state.</li>
+<li><strong>Decoder, attention:</strong> at each step, additive
+attention <code>score(s, h_i) = v^T tanh(W_s s + W_h h_i)</code>,
+softmax over source positions (padding masked), context = weighted sum
+of encoder states. The context is concatenated to the LSTM input, and
+the output layer sees [hidden state, context, previous-token
+embedding].</li>
+<li><strong>Prediction and stopping:</strong> arg-max at each step
+(greedy), or beam search; generation stops at <code>&lt;EOS&gt;</code>
+or after 60 tokens.</li>
+<li><strong>Parameters:</strong> baseline 964,396; attention
+1,375,020.</li>
+</ul>
+<h2 id="6-training-and-evaluation-protocol">6. Training and evaluation
+protocol</h2>
+<ul>
+<li><strong>Loss:</strong> token-level cross-entropy, padding ignored.
+<strong>Optimiser:</strong> Adam, learning rate 1e-3, halved after 2
+epochs without validation-loss improvement, gradient clipping at
+1.0.</li>
+<li><strong>Batch size 64</strong>, dropout 0.3, word dropout 0.05,
+batches grouped by target length. <strong>Teacher forcing</strong> ratio
+1.0 (the gold previous token is always fed in training).</li>
+<li><strong>Model selection:</strong> epoch with the best validation
+exact match; early stopping after 4 epochs without improvement (6 for
+the long baseline). At most 15 epochs (30 for the long baseline, because
+the 15-epoch baseline was still improving).</li>
+<li><strong>Hardware:</strong> CPU only (two cores, shared with other
+runs). Training time: 25 minutes for the attention model, 19 minutes for
+the 15-epoch baseline, 51 minutes for the 30-epoch baseline.</li>
+</ul>
+<p><strong>Metrics.</strong></p>
+<table>
+<thead>
+<tr class="header">
+<th>Metric</th>
+<th>Meaning</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Exact match (EM)</td>
+<td>generated regex identical to the reference (in slot form)</td>
+<td>strict: equivalent regexes written differently count as wrong</td>
+</tr>
+<tr class="even">
+<td>Same behaviour (functional accuracy)</td>
+<td>generated regex accepts and rejects the same probe strings as the
+reference (about 600 strings built from the words dog, truck, ring that
+stand in for the slots, letters, digits, spaces and repetitions)</td>
+<td>closer to what a user cares about</td>
+</tr>
+<tr class="odd">
+<td>BLEU-4</td>
+<td>n-gram overlap on regex tokens</td>
+<td>smooth diagnostic for near misses</td>
+</tr>
+<tr class="even">
+<td>Perplexity, token accuracy</td>
+<td>teacher-forced diagnostics</td>
+<td>compare models independently of decoding</td>
+</tr>
+<tr class="odd">
+<td>Valid-regex rate</td>
+<td>output parses as a regex</td>
+<td>syntax errors</td>
+</tr>
+</tbody>
+</table>
+<h2 id="7-experimental-results">7. Experimental results</h2>
+<p>Greedy decoding.</p>
+<table>
+<thead>
+<tr class="header">
+<th>Model</th>
+<th>Params</th>
+<th>Test set</th>
+<th>n</th>
+<th>Exact match (%)</th>
+<th>Same behaviour (%)</th>
+<th>BLEU-4</th>
+<th>Perplexity</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>LSTM baseline, 15 epochs</td>
+<td>964k</td>
+<td>New regexes</td>
+<td>1,884</td>
+<td>92.4</td>
+<td>93.3</td>
+<td>98.0</td>
+<td>1.017</td>
+</tr>
+<tr class="even">
+<td></td>
+<td></td>
+<td>New phrasings</td>
+<td>1,500</td>
+<td>75.1</td>
+<td>77.3</td>
+<td>95.6</td>
+<td>1.053</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td></td>
+<td>Handwritten</td>
+<td>50</td>
+<td>94.0</td>
+<td>96.0</td>
+<td>98.2</td>
+<td>1.033</td>
+</tr>
+<tr class="even">
+<td>LSTM baseline, 30 epochs</td>
+<td>964k</td>
+<td>New regexes</td>
+<td>1,884</td>
+<td>95.6</td>
+<td>96.2</td>
+<td>99.0</td>
+<td>1.009</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td></td>
+<td>New phrasings</td>
+<td>1,500</td>
+<td>81.2</td>
+<td>83.3</td>
+<td>96.8</td>
+<td>1.035</td>
+</tr>
+<tr class="even">
+<td></td>
+<td></td>
+<td>Handwritten</td>
+<td>50</td>
+<td>92.0</td>
+<td>92.0</td>
+<td>97.4</td>
+<td>1.067</td>
+</tr>
+<tr class="odd">
+<td><strong>LSTM + attention</strong></td>
+<td>1.38M</td>
+<td>New regexes</td>
+<td>1,884</td>
+<td><strong>99.4</strong></td>
+<td><strong>99.4</strong></td>
+<td>99.9</td>
+<td>1.002</td>
+</tr>
+<tr class="even">
+<td></td>
+<td></td>
+<td>New phrasings</td>
+<td>1,500</td>
+<td><strong>82.6</strong></td>
+<td><strong>84.3</strong></td>
+<td>97.4</td>
+<td>1.039</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td></td>
+<td>Handwritten</td>
+<td>50</td>
+<td><strong>96.0</strong></td>
+<td>96.0</td>
+<td>97.6</td>
+<td>1.038</td>
+</tr>
+<tr class="even">
+<td>LSTM + attention, second seed</td>
+<td>1.38M</td>
+<td>New regexes</td>
+<td>1,884</td>
+<td>99.7</td>
+<td>99.7</td>
+<td>100.0</td>
+<td>1.001</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td></td>
+<td>New phrasings</td>
+<td>1,500</td>
+<td>83.3</td>
+<td>84.7</td>
+<td>97.0</td>
+<td>1.036</td>
+</tr>
+<tr class="even">
+<td></td>
+<td></td>
+<td>Handwritten</td>
+<td>50</td>
+<td>96.0</td>
+<td>96.0</td>
+<td>97.6</td>
+<td>1.039</td>
+</tr>
+</tbody>
+</table>
+<p>Valid-regex rate is 99.6 to 100% for every model and test set.</p>
+<p><strong>By kind of description</strong> (new-regex test set, exact
+match %): all models are perfect on single and negated conditions (256
+examples). On AND combinations (1,031 examples) the baseline scores
+88.1% after 15 epochs and 92.5% after 30, the attention model 99.4%; on
+OR combinations (597) the baselines score 96.6% and 99.0%, the attention
+model 99.0%.</p>
+<p><strong>Learning curves</strong>
+(<code>results/learning_curves.png</code>). The attention model reaches
+88.7% validation exact match after one epoch and 99.75% after four (best
+99.95% at epoch 7). The baseline needs 7 epochs to pass 88%, reaches
+94.3% at epoch 14 and 96.3% at epoch 28, and is still creeping up at
+epoch 30. The two baseline runs use the same seed and follow exactly the
+same curve for their first 15 epochs, so the 15-epoch baseline is the
+first half of the 30-epoch run (its curve is hidden under the longer one
+in the figure). Training and validation losses stay close for both
+models (attention: 0.017 train, 0.0007 validation at the best epoch;
+validation is lower because dropout is active only during training), so
+there is no sign of overfitting on this data.</p>
+<p><img src="img/learning_curves.png"
+alt="Learning curves of the baseline and the attention model: training loss (dashed) and validation loss (solid), validation exact match and validation BLEU-4 per epoch." /></p>
+<p><strong>Greedy versus beam search</strong> (beam 5,
+length-normalised):</p>
+<table>
+<thead>
+<tr class="header">
+<th>Model</th>
+<th>Test set</th>
+<th>Greedy: exact / same (%)</th>
+<th>Beam 5: exact / same (%)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Baseline, 15 epochs</td>
+<td>New regexes</td>
+<td>92.4 / 93.3</td>
+<td>92.7 / 93.5</td>
+</tr>
+<tr class="even">
+<td>Baseline, 15 epochs</td>
+<td>New phrasings</td>
+<td>75.1 / 77.3</td>
+<td>75.1 / 77.5</td>
+</tr>
+<tr class="odd">
+<td>Baseline, 15 epochs</td>
+<td>Handwritten</td>
+<td>94.0 / 96.0</td>
+<td>96.0 / 96.0</td>
+</tr>
+<tr class="even">
+<td>Attention</td>
+<td>New regexes</td>
+<td>99.4 / 99.4</td>
+<td>99.4 / 99.5</td>
+</tr>
+<tr class="odd">
+<td>Attention</td>
+<td>New phrasings</td>
+<td>82.6 / 84.3</td>
+<td>82.6 / 84.3</td>
+</tr>
+<tr class="even">
+<td>Attention</td>
+<td>Handwritten</td>
+<td>96.0 / 96.0</td>
+<td>96.0 / 96.0</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Reading the results.</strong></p>
+<ol type="1">
+<li><strong>Attention is the decisive component for new regex
+structures.</strong> Against the baseline trained for the same 15 epochs
+it removes nine tenths of the errors on new regexes (7.6% wrong down to
+0.6%); against the baseline trained twice as long it still removes six
+in seven (4.4% down to 0.6%), with fewer epochs and less time. The
+baseline's errors concentrate in AND combinations, where one fixed-size
+vector has to carry two or three conditions with their literals and
+numbers (92.5% exact after 30 epochs, against 99.4%).</li>
+<li><strong>Generalisation to new wording is the real difficulty, and
+here attention helps less.</strong> On held-out sentence patterns, exact
+match falls to 82.6% for the attention model (83.3% for the second
+seed), against 75.1% for the 15-epoch baseline and 81.2% for the
+30-epoch baseline. With enough training, the baseline nearly closes the
+gap: what limits both models on new wording is what they learned from
+the templates, not the architecture. The errors are analysed in section
+9.</li>
+<li><strong>Handwritten descriptions mostly work</strong> (48 of 50
+exact for the attention model, 47 and 46 of 50 for the two baselines);
+the two attention errors involve "no ... at all" and an AND written as a
+relative clause (section 8). With 50 examples, one example is 2 points,
+so these differences are not significant.</li>
+<li><strong>Beam search changes little.</strong> For the attention model
+it returns the greedy output in almost every case: its predictions are
+so confident that the best sequence is also the greedy one. For the
+baseline it adds 0.3 points on new regexes and one handwritten example.
+(A first version of our beam search stopped as soon as five hypotheses
+had ended, which could discard the best one and cost about 10 points of
+exact match; the corrected version stops only when no open hypothesis
+can still beat the best finished one.)</li>
+<li><strong>Comparison with the first version.</strong> On NL-RX the
+same architecture reached 45.3% exact match. The two numbers are not
+comparable as a measure of model quality, since the tasks differ, but
+the difference shows how much of that 45% came from noisy and ambiguous
+labels, which a model cannot learn to reproduce.</li>
+</ol>
+<p>Attention visualisations
+(<code>results/attention_examples.png</code>) are interpretable: while
+writing the count <code>3</code> the decoder attends to "3" (and to
+"least" and "times" around it); each slot attends to its quoted literal;
+<code>~</code> attends to "not" and <code>&amp;</code> to "and"; the
+character class <code>[AEIOUaeiou]</code> attends to "vowel"; and for
+"strings with 'blue' somewhere after 'red'" the decoder writes 'red'
+first, attending to the last word of the sentence, which is the required
+reordering.</p>
+<p><img src="img/attention_examples.png"
+alt="Attention weights of the attention model on four descriptions: rows are generated regex tokens, columns are input words." /></p>
+<h2 id="8-generated-examples">8. Generated examples</h2>
+<p>Attention model, greedy decoding. Full lists in
+<code>results/qualitative_examples.md</code>. Literals are shown after
+slot replacement.</p>
+<p><strong>Correct (new regexes)</strong></p>
+<table>
+<thead>
+<tr class="header">
+<th>Input</th>
+<th>Output (= reference)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>show me rows which never have an alphabetic character right before
+the substring 'Hello' and contain a vowel followed later by 's'</td>
+<td><code>(~(.*[A-Za-z]Hello.*))&amp;(.*[AEIOUaeiou].*s.*)</code></td>
+</tr>
+<tr class="even">
+<td>a regular expression for text lines that have exactly 20 characters
+and are longer than 3 characters</td>
+<td><code>(.{20})&amp;(~(.{0,3}))</code></td>
+</tr>
+<tr class="odd">
+<td>a regex for lines in which the text doesn't begin with a digit and
+the text finishes with the substring 'report'</td>
+<td><code>(~([0-9].*))&amp;(.*report)</code></td>
+</tr>
+<tr class="even">
+<td>I want all strings where 'table' is repeated 4 times in a row and
+the length is at least 9 (new phrasing)</td>
+<td><code>(.*(table){4,}.*)&amp;(.{9,})</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Handwritten</strong></p>
+<table>
+<thead>
+<tr class="header">
+<th>Input</th>
+<th>Output</th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>lines where 'cat' shows up at least twice</td>
+<td><code>(.*cat){2,}.*</code></td>
+<td>correct</td>
+</tr>
+<tr class="even">
+<td>lines in which 'price' comes before 'total'</td>
+<td><code>.*price.*total.*</code></td>
+<td>correct</td>
+</tr>
+<tr class="odd">
+<td>lines where 'blue' comes somewhere after 'red'</td>
+<td><code>.*red.*blue.*</code></td>
+<td>correct, literals reordered</td>
+</tr>
+<tr class="even">
+<td>lines with no digits at all</td>
+<td><code>.{0,9}</code></td>
+<td>wrong: "no ... at all" never occurs in training ("without", "do not
+contain" do)</td>
+</tr>
+<tr class="odd">
+<td>lines of at most 10 characters that contain a digit</td>
+<td><code>(.{0,10})|(.*[0-9].*)</code></td>
+<td>wrong: AND expressed as a relative clause became OR</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Failures on held-out phrasings</strong></p>
+<table>
+<thead>
+<tr class="header">
+<th>Input</th>
+<th>Reference</th>
+<th>Generated</th>
+<th>What went wrong</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>... have the sequence "Alice" at the end but do not contain a
+space</td>
+<td><code>(.*Alice)&amp;(~(.* .*))</code></td>
+<td><code>(Alice.*)&amp;(~(.* .*))</code></td>
+<td>held-out "have X at the end" read as "at the start"</td>
+</tr>
+<tr class="even">
+<td>... contain the substring 'zero' no fewer than three times and
+...</td>
+<td><code>((.*zero){3,}.*)&amp;...</code></td>
+<td><code>(~((.*zero){3,}.*))&amp;...</code></td>
+<td>"no fewer than" read as "fewer than": negation flipped</td>
+</tr>
+<tr class="odd">
+<td>... have a capital at the end and also is longer than seven
+characters</td>
+<td><code>(.*[A-Z])&amp;(~(.{0,7}))</code></td>
+<td><code>(.*[A-Z].*)&amp;(~(.{0,7}))</code></td>
+<td>"at the end" read as "contains"</td>
+</tr>
+<tr class="even">
+<td>... contain a capital letter with the substring 'paper' right after
+...</td>
+<td><code>(.*[A-Z]paper.*)&amp;...</code></td>
+<td><code>(.*paper.*[A-Z].*)&amp;...</code></td>
+<td>held-out "with Y right after" confused with "Y after X" and the
+order inverted</td>
+</tr>
+</tbody>
+</table>
+<h2 id="9-discussion">9. Discussion</h2>
+<p><strong>Does the model learn the task?</strong> On the distribution
+it was trained on, yes: 99.4% of regexes never seen in training are
+generated exactly, BLEU is 99.9 and outputs are valid regexes 99.9% of
+the time. The remaining 11 errors (of 1,884) are instructive. Six are
+the same structure, "ends with X or Y" (<code>(.*X)|(.*Y)</code>), which
+is absent from training because of the split by regex: the model writes
+the second ending as "contains" (<code>(.*Y.*)</code>), the shape it has
+seen in "contains X or Y". Two are outputs cut at the 60-token limit
+(both references are longer than that), and the last three drop or alter
+one condition of a long description.</p>
+<p><strong>Where it fails.</strong> Error types on the new-phrasing test
+(attention model, 235 wrong outputs, all valid regexes): 68 have a
+missing or extra negation, 8 a wrong character class, 3 only a wrong
+number, and 156 another structural error, most of which are a condition
+read as a different one (for example "at the end" as "contains" or
+"starts with"). These are exactly the held-out templates: the model has
+not learned the meaning of words like "end" independently of the
+construction they appeared in during training; it has learned
+constructions. "No fewer than N" is a clear example: the words "no" and
+"fewer than" both occur in training, and the model follows "fewer
+than".</p>
+<p><strong>Why.</strong> The training sentences come from templates, so
+the model sees each condition in a limited set of constructions; within
+those it is nearly perfect, but recombining known words into a new
+construction is only partly learned. This is a known weakness of
+sequence-to-sequence models trained from scratch on synthetic data, and
+the reason we report the held-out-phrasing and handwritten sets next to
+the in-distribution one.</p>
+<p><strong>Strengths.</strong> Small model, CPU training in under half
+an hour, interpretable attention, no pretrained component, valid syntax,
+any literal word (slots), and labels that are verified rather than
+assumed.</p>
+<p><strong>Limitations.</strong></p>
+<ul>
+<li><em>Synthetic language.</em> Template sentences are more regular
+than human writing; the 99.4% figure is an in-distribution number. The
+held-out-phrasing and handwritten sets are the more honest estimates,
+and the handwritten set is small (50) and mostly simple.</li>
+<li><em>Behavioural equivalence is a sampling test.</em> We found one
+false "equivalent": for "a line containing three consecutive copies of
+'light' and also lacking a number" the model wrote
+<code>~(.*[0-9].*[0-9].*)</code> ("fewer than two digits") instead of
+<code>~(.*[0-9].*)</code>, and none of the 600 probe strings has three
+copies of the literal and exactly one digit. Exact match is reliable
+here because the generator writes one canonical regex per meaning.</li>
+<li><em>Canonical order.</em> Exact match counts
+<code>(A)&amp;(B)</code> and <code>(B)&amp;(A)</code> as different; the
+generator always follows the order of the description, so this rarely
+matters (one handwritten example).</li>
+<li><em>Length limit.</em> 60 target tokens; 11 training regexes are
+longer and are truncated.</li>
+<li><em>Seeds and training length.</em> The 30-epoch baseline was still
+improving slightly at its last epoch, so a longer run could narrow the
+gap further. The attention model was trained with two seeds (99.4 and
+99.7% on new regexes, 82.6 and 83.3% on new phrasings, 96% on
+handwritten for both), so its results are stable to within about one
+point; the baselines have one seed each. The first seed is the one
+reported in the main text and used on the website.</li>
+</ul>
+<p><strong>Possible improvements.</strong> Paraphrasing the generated
+sentences (by people, or with a model for data creation only) to bring
+the training language closer to real requests; more constructions per
+condition; a copy mechanism instead of slots for unquoted literals;
+tree-structured or grammar-constrained decoding; exact DFA-based
+equivalence instead of probe strings.</p>
+<h2 id="10-conclusion">10. Conclusion</h2>
+<p>A from-scratch LSTM encoder-decoder with additive attention
+translates English descriptions into regular expressions. Training it on
+a dataset whose labels are verified, rather than on a benchmark whose
+labels sometimes contradict their English, changes the picture: the
+attention model generates 99.4% of unseen regexes exactly, 82.6% on
+sentence patterns held out of training and 48 of 50 handwritten
+descriptions. The same network without attention, trained twice as long,
+reaches 95.6%, 81.2% and 46 of 50. Attention is the component that
+matters most for new combinations of conditions and for training speed;
+on new wording both models are limited by the templates they learned
+from. The main remaining weakness is new wording, especially negation
+words in unfamiliar constructions. Lessons learned: check the labels
+before trusting a metric, and always test on a distribution other than
+the one the data generator produces.</p>
+<p><strong>Reproducibility.</strong> <code>README.md</code> lists the
+commands. <code>python src/generate.py</code> rebuilds the dataset
+deterministically; every run's configuration, learning curve, checkpoint
+and test predictions are in <code>results/&lt;run&gt;/</code>.</p>
+<h2 id="references">References</h2>
+<ul>
+<li>Locascio, Narasimhan, DeLeon, Kushman, Barzilay. <em>Neural
+Generation of Regular Expressions from Natural Language with Minimal
+Domain Knowledge.</em> EMNLP 2016. <a
+href="https://arxiv.org/abs/1608.03000">https://arxiv.org/abs/1608.03000</a></li>
+<li>Sutskever, Vinyals, Le. <em>Sequence to Sequence Learning with
+Neural Networks.</em> NeurIPS 2014.</li>
+<li>Bahdanau, Cho, Bengio. <em>Neural Machine Translation by Jointly
+Learning to Align and Translate.</em> ICLR 2015.</li>
+<li>Ye, Chen, Wang, Dillig, Durrett. <em>Benchmarking Multimodal Regex
+Synthesis with Complex Structures.</em> ACL 2020 (StructuredRegex).</li>
+</ul>
+</main>
+</body>
+</html>

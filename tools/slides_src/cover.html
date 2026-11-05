@@ -1,0 +1,20 @@
+<section id="cover" data-transition="fade" style="background:#111A2C;color:#F1EEE5;font-family:'IBM Plex Sans', Arial, sans-serif;padding:128px;display:flex;flex-direction:column;justify-content:space-between">
+<div style="display:flex;flex-direction:column;gap:24px">
+<p style="font-size:28px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#F2B544">NLP course project · Encoder-decoder text generation</p>
+<h1 style="font-size:112px;font-weight:600;line-height:1.05;color:#F1EEE5">From English to regular expressions</h1>
+<p style="font-size:44px;line-height:1.3;color:#B7C0D0">An encoder-decoder with attention, built from scratch and trained on a verified dataset</p>
+</div>
+<div style="display:flex;align-items:center;gap:32px">
+<div style="flex:1;display:flex;flex-direction:column;gap:8px;background:#1B2740;border:1px solid #2C3B5C;border-radius:16px;padding:32px">
+<p style="font-size:24px;color:#B7C0D0">English</p>
+<p style="font-size:34px;line-height:1.3;color:#F1EEE5">lines containing ‘cat’ at least 2 times</p>
+</div>
+<x-shape kind="arrow-right" style="width:96px;height:48px;background:#F2B544"></x-shape>
+<div style="flex:1;display:flex;flex-direction:column;gap:8px;background:#1B2740;border:1px solid #2C3B5C;border-radius:16px;padding:32px">
+<p style="font-size:24px;color:#B7C0D0">Regular expression</p>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:40px;line-height:1.3;color:#F2B544">(.*cat){2,}.*</p>
+</div>
+</div>
+<p style="font-size:32px;color:#F1EEE5">Mohamed Ali Aoun</p>
+<aside>Welcome. This project builds a sequence-to-sequence model from scratch that reads an English description of a set of text lines and writes the regular expression for it. The example on the slide is the whole task in one picture: English on the left, the regex on the right. I will explain why we built our own verified dataset, then the model, the experiments, and finish with a live demo in the browser.</aside>
+</section>

@@ -1,0 +1,671 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NL2Regex: presentation</title>
+<style>
+@font-face{font-family:"IBM Plex Sans";font-weight:400;font-style:normal;font-display:swap;src:url(../fonts/ibm-plex-sans-latin-400-normal.woff2) format("woff2")}
+@font-face{font-family:"IBM Plex Sans";font-weight:500;font-style:normal;font-display:swap;src:url(../fonts/ibm-plex-sans-latin-500-normal.woff2) format("woff2")}
+@font-face{font-family:"IBM Plex Sans";font-weight:600;font-style:normal;font-display:swap;src:url(../fonts/ibm-plex-sans-latin-600-normal.woff2) format("woff2")}
+@font-face{font-family:"IBM Plex Sans";font-weight:700;font-style:normal;font-display:swap;src:url(../fonts/ibm-plex-sans-latin-700-normal.woff2) format("woff2")}
+@font-face{font-family:"JetBrains Mono";font-weight:400;font-style:normal;font-display:swap;src:url(../fonts/jetbrains-mono-latin-400-normal.woff2) format("woff2")}
+@font-face{font-family:"JetBrains Mono";font-weight:600;font-style:normal;font-display:swap;src:url(../fonts/jetbrains-mono-latin-600-normal.woff2) format("woff2")}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:#0B1220;font-family:"IBM Plex Sans",system-ui,Arial,sans-serif;color:#F1EEE5;overflow:hidden}
+p,h1,h2,h3,ul,ol,li,figure{margin:0}
+ul,ol{padding:0;list-style:none}
+.app{display:flex;flex-direction:column;height:100%}
+.viewport{flex:1;min-height:0;position:relative;overflow:hidden;display:grid;place-items:center}
+.stage{position:absolute;left:50%;top:50%;width:1920px;height:1080px;transform-origin:0 0;background:#111A2C;box-shadow:0 8px 40px rgba(0,0,0,.45)}
+.slide{position:absolute;left:0;top:0;width:1920px;height:1080px;overflow:hidden;box-sizing:border-box}
+.slide:not(.active){display:none!important}
+.shape{flex:none}
+.slide table{border-collapse:collapse;width:100%}
+.slide th,.slide td{padding:11px 20px;border-bottom:1px solid #DDD7C6;text-align:left;vertical-align:top}
+.slide th{font-weight:600;color:#4B5568;border-bottom:2px solid #C9C2AE}
+.slide tr:last-child td{border-bottom:none}
+.shape.arrow-right{clip-path:polygon(0 36%,62% 36%,62% 8%,100% 50%,62% 92%,62% 64%,0 64%)}
+.shape.arrow-down{clip-path:polygon(36% 0,64% 0,64% 62%,92% 62%,50% 100%,8% 62%,36% 62%)}
+.bar{display:flex;align-items:center;justify-content:center;gap:10px;padding:8px 12px;background:#111A2C;border-top:1px solid #2C3B5C;flex-wrap:wrap}
+.bar button{font:inherit;font-size:15px;font-weight:600;color:#F1EEE5;background:#1B2740;border:1px solid #2C3B5C;border-radius:9px;padding:7px 14px;cursor:pointer}
+.bar button:hover{border-color:#F2B544}
+.bar button:focus-visible{outline:3px solid #F2B544;outline-offset:2px}
+.bar button[aria-pressed="true"]{background:#F2B544;color:#111A2C;border-color:#F2B544}
+.counter{font-size:15px;color:#B7C0D0;min-width:84px;text-align:center}
+.notes{max-height:34vh;overflow:auto;padding:14px 22px;background:#0F1626;border-top:1px solid #2C3B5C;font-size:17px;line-height:1.55;color:#E5E1D4}
+.notes strong{color:#F2B544}
+.embed .bar{padding:5px 8px}
+.embed .bar button{font-size:13.5px;padding:5px 10px}
+.embed .notes{font-size:15px;max-height:30vh}
+[hidden]{display:none!important}
+/* print: one slide per page */
+.print html,.print body{overflow:visible;height:auto;background:#fff}
+.print .app{display:block;height:auto}
+.print .viewport{display:block;overflow:visible}
+.print .stage{position:static;transform:none!important;box-shadow:none}
+.print .slide:not(.active){display:flex!important}
+.print .slide{position:relative;page-break-after:always;break-after:page}
+.print .bar,.print .notes{display:none!important}
+@page{size:1920px 1080px;margin:0}
+@media print{html,body{background:#fff;overflow:visible;height:auto}.bar,.notes{display:none!important}}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+  <div class="viewport" id="viewport">
+    <div class="stage" id="stage">
+<section class="slide" id="cover" data-transition="fade" style="background:#111A2C;color:#F1EEE5;font-family:'IBM Plex Sans', Arial, sans-serif;padding:128px;display:flex;flex-direction:column;justify-content:space-between">
+<div style="display:flex;flex-direction:column;gap:24px">
+<p style="font-size:28px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#F2B544">NLP course project · Encoder-decoder text generation</p>
+<h1 style="font-size:112px;font-weight:600;line-height:1.05;color:#F1EEE5">From English to regular expressions</h1>
+<p style="font-size:44px;line-height:1.3;color:#B7C0D0">An encoder-decoder with attention, built from scratch and trained on a verified dataset</p>
+</div>
+<div style="display:flex;align-items:center;gap:32px">
+<div style="flex:1;display:flex;flex-direction:column;gap:8px;background:#1B2740;border:1px solid #2C3B5C;border-radius:16px;padding:32px">
+<p style="font-size:24px;color:#B7C0D0">English</p>
+<p style="font-size:34px;line-height:1.3;color:#F1EEE5">lines containing ‘cat’ at least 2 times</p>
+</div>
+<div class="shape arrow-right" style="width:96px;height:48px;background:#F2B544"></div>
+<div style="flex:1;display:flex;flex-direction:column;gap:8px;background:#1B2740;border:1px solid #2C3B5C;border-radius:16px;padding:32px">
+<p style="font-size:24px;color:#B7C0D0">Regular expression</p>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:40px;line-height:1.3;color:#F2B544">(.*cat){2,}.*</p>
+</div>
+</div>
+<p style="font-size:32px;color:#F1EEE5">Mohamed Ali Aoun</p>
+
+</section>
+<section class="slide" id="task" data-transition="fade" style="background:#F6F3EA;color:#17203A;font-family:'IBM Plex Sans', Arial, sans-serif;padding:96px 128px 160px;display:flex;flex-direction:column;gap:32px">
+<div style="display:flex;flex-direction:column;gap:12px">
+<p style="font-size:24px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#0B6465">The task</p>
+<h2 style="font-size:64px;font-weight:600;line-height:1.1">Describe the lines in English, get the regex</h2>
+</div>
+<div style="display:flex;flex-direction:column;gap:24px">
+<div style="display:flex;align-items:center;gap:24px">
+<div style="flex:1.3;background:#FBFAF5;border:1px solid #DDD7C6;border-radius:16px;padding:28px 32px"><p style="font-size:30px;line-height:1.35">lines where ‘red’ comes before ‘blue’</p></div>
+<div class="shape arrow-right" style="width:64px;height:32px;background:#0B6465"></div>
+<div style="flex:1;background:#17203A;border-radius:16px;padding:28px 32px"><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:30px;color:#F2B544">.*red.*blue.*</p></div>
+</div>
+<div style="display:flex;align-items:center;gap:24px">
+<div style="flex:1.3;background:#FBFAF5;border:1px solid #DDD7C6;border-radius:16px;padding:28px 32px"><p style="font-size:30px;line-height:1.35">lines that start with a capital letter and end with a number</p></div>
+<div class="shape arrow-right" style="width:64px;height:32px;background:#0B6465"></div>
+<div style="flex:1;background:#17203A;border-radius:16px;padding:28px 32px"><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:30px;color:#F2B544">([A-Z].*)&amp;(.*[0-9])</p></div>
+</div>
+<div style="display:flex;align-items:center;gap:24px">
+<div style="flex:1.3;background:#FBFAF5;border:1px solid #DDD7C6;border-radius:16px;padding:28px 32px"><p style="font-size:30px;line-height:1.35">lines that contain ‘error’ and do not contain ‘warning’</p></div>
+<div class="shape arrow-right" style="width:64px;height:32px;background:#0B6465"></div>
+<div style="flex:1;background:#17203A;border-radius:16px;padding:28px 32px"><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:30px;color:#F2B544">(.*error.*)&amp;(~(.*warning.*))</p></div>
+</div>
+</div>
+<p style="font-size:28px;line-height:1.4;color:#4B5568">A sequence-to-sequence problem: one token sequence in, another out. The regex has to match whole lines, &amp; means and, ~ means not, and the model has no pretrained weights.</p>
+<p style="position:absolute;left:128px;bottom:64px;width:1200px;font-size:24px;color:#5A6275">2  ·  The task</p>
+
+</section>
+<section class="slide" id="problem" data-transition="fade" style="background:#F6F3EA;color:#17203A;font-family:'IBM Plex Sans', Arial, sans-serif;padding:96px 128px 160px;display:flex;flex-direction:column;gap:32px">
+<div style="display:flex;flex-direction:column;gap:12px">
+<p style="font-size:24px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#0B6465">Why a new dataset</p>
+<h2 style="font-size:64px;font-weight:600;line-height:1.1">In the standard benchmark, English and regex can disagree</h2>
+</div>
+<div style="display:flex;align-items:center;gap:24px">
+<div style="flex:1.2;background:#FBFAF5;border:1px solid #DDD7C6;border-radius:16px;padding:28px 32px;display:flex;flex-direction:column;gap:8px"><p style="font-size:22px;color:#4B5568">NL-RX description</p><p style="font-size:32px;line-height:1.35">lines with the string ‘dog’ at least 2 times</p></div>
+<div class="shape arrow-right" style="width:64px;height:32px;background:#0B6465"></div>
+<div style="flex:1;background:#17203A;border-radius:16px;padding:28px 32px;display:flex;flex-direction:column;gap:8px"><p style="font-size:22px;color:#B7C0D0">NL-RX label</p><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:34px;color:#F2B544">.*(dog){2,}.*</p></div>
+</div>
+<div style="display:flex;gap:24px">
+<div style="flex:1;display:flex;flex-direction:column;gap:8px;background:#FBFAF5;border:1px solid #DDD7C6;border-radius:16px;padding:28px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:34px;font-weight:600;color:#0B6465">dogdog</p>
+<p style="font-size:26px;line-height:1.4;color:#4B5568">accepted: two copies side by side</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:8px;background:#F8E8C2;border:1px solid #E6CF98;border-radius:16px;padding:28px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:34px;font-weight:600;color:#7A4B00">dog and dog</p>
+<p style="font-size:26px;line-height:1.4">rejected, although it contains ‘dog’ twice</p>
+</div>
+</div>
+<p style="font-size:28px;line-height:1.4;color:#4B5568">The model learned this label faithfully, so a correct output looked wrong to a human reader. The templated version of the dataset (NL-RX-Synth) has the same convention. Our first model scored 45.3% exact match on this data.</p>
+<p style="position:absolute;left:128px;bottom:64px;width:1200px;font-size:24px;color:#5A6275">3  ·  Why a new dataset</p>
+
+</section>
+<section class="slide" id="generator" data-transition="fade" style="background:#F6F3EA;color:#17203A;font-family:'IBM Plex Sans', Arial, sans-serif;padding:96px 128px 160px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:12px">
+<p style="font-size:24px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#0B6465">VeriRegex: our verified dataset</p>
+<h2 style="font-size:64px;font-weight:600;line-height:1.1">Every label is checked by a second, independent definition</h2>
+</div>
+<div style="display:flex;align-items:center;gap:16px">
+<div style="flex:1;display:flex;flex-direction:column;gap:6px;background:#17203A;border-radius:16px;padding:24px"><p style="font-size:22px;color:#B7C0D0">1. Meaning tree</p><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:26px;color:#F2B544">atleast(‘cat’, 2)</p></div>
+<div class="shape arrow-right" style="width:48px;height:28px;background:#0B6465"></div>
+<div style="flex:1.25;display:flex;flex-direction:column;gap:10px">
+<div style="display:flex;flex-direction:column;gap:4px;background:#FBFAF5;border:1px solid #DDD7C6;border-radius:14px;padding:16px 20px"><p style="font-size:22px;color:#4B5568">2a. English, many phrasings</p><p style="font-size:26px;line-height:1.3">lines where ‘cat’ appears at least twice</p></div>
+<div style="display:flex;flex-direction:column;gap:4px;background:#FBFAF5;border:1px solid #DDD7C6;border-radius:14px;padding:16px 20px"><p style="font-size:22px;color:#4B5568">2b. Regex</p><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:26px;color:#0B6465">(.*cat){2,}.*</p></div>
+<div style="display:flex;flex-direction:column;gap:4px;background:#FBFAF5;border:1px solid #DDD7C6;border-radius:14px;padding:16px 20px"><p style="font-size:22px;color:#4B5568">2c. Python predicate</p><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:26px;color:#0B6465">s.count('cat') &gt;= 2</p></div>
+</div>
+<div class="shape arrow-right" style="width:48px;height:28px;background:#0B6465"></div>
+<div style="flex:1;display:flex;flex-direction:column;gap:8px;background:#DCEDEA;border:1px solid #B9D8D4;border-radius:16px;padding:24px"><p style="font-size:22px;color:#0B6465;font-weight:600">3. Check on about 300 probe strings</p><p style="font-size:26px;line-height:1.35">Regex and predicate must agree on every string, and some lines must match and some must not.</p></div>
+</div>
+<div style="display:flex;gap:24px">
+<div style="flex:1;display:flex;align-items:baseline;gap:16px;background:#FBFAF5;border:1px solid #DDD7C6;border-radius:16px;padding:20px 28px"><p style="font-size:48px;font-weight:600;color:#0B6465">0</p><p style="font-size:26px;line-height:1.35;color:#4B5568">disagreements: one would stop the build</p></div>
+<div style="flex:1;display:flex;align-items:baseline;gap:16px;background:#FBFAF5;border:1px solid #DDD7C6;border-radius:16px;padding:20px 28px"><p style="font-size:48px;font-weight:600;color:#0B6465">5,251</p><p style="font-size:26px;line-height:1.35;color:#4B5568">contradictions or tautologies thrown away</p></div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1200px;font-size:24px;color:#5A6275">4  ·  VeriRegex</p>
+
+</section>
+<section class="slide" id="dataset" data-transition="fade" style="background:#F6F3EA;color:#17203A;font-family:'IBM Plex Sans', Arial, sans-serif;padding:96px 128px 160px;display:flex;flex-direction:column;gap:26px">
+<div style="display:flex;flex-direction:column;gap:12px">
+<p style="font-size:24px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#0B6465">Dataset</p>
+<h2 style="font-size:64px;font-weight:600;line-height:1.1">41,000 verified pairs and three kinds of test</h2>
+</div>
+<div style="display:flex;gap:24px">
+<div style="flex:1;display:flex;flex-direction:column;gap:8px;background:#FBFAF5;border:1px solid #DDD7C6;border-radius:16px;padding:28px">
+<p style="font-size:64px;font-weight:600;line-height:1.1;color:#0B6465">13</p>
+<p style="font-size:26px;line-height:1.35;color:#4B5568">kinds of condition, combined with not, and, or</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:8px;background:#FBFAF5;border:1px solid #DDD7C6;border-radius:16px;padding:28px">
+<p style="font-size:64px;font-weight:600;line-height:1.1;color:#0B6465">216</p>
+<p style="font-size:26px;line-height:1.35;color:#4B5568">phrasing templates, plus synonyms, subjects and openers</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:8px;background:#FBFAF5;border:1px solid #DDD7C6;border-radius:16px;padding:28px">
+<p style="font-size:64px;font-weight:600;line-height:1.1;color:#0B6465">135</p>
+<p style="font-size:26px;line-height:1.35;color:#4B5568">literal words, numbers and phrases in quotes</p>
+</div>
+</div>
+<table style="font-size:25px">
+<tr><th style="width:26%">Split</th><th style="width:12%;text-align:right">Pairs</th><th style="width:62%">What it tests</th></tr>
+<tr><td>Train</td><td style="text-align:right">37,586</td><td>14,345 distinct regex structures</td></tr>
+<tr><td>Validation</td><td style="text-align:right">2,000</td><td>model selection, regexes unseen in training</td></tr>
+<tr><td>Test: new regexes</td><td style="text-align:right">1,884</td><td>new combinations and parameters, never in training</td></tr>
+<tr><td>Test: new phrasings</td><td style="text-align:right">1,500</td><td>11 sentence patterns held out of training, new regexes</td></tr>
+<tr><td>Test: handwritten</td><td style="text-align:right">50</td><td>descriptions written by hand in free wording</td></tr>
+</table>
+<p style="font-size:26px;line-height:1.4;color:#4B5568">The split is by regex: no regex structure appears in both training and a test set (except 46 of the 50 handwritten ones, which test wording, not structure).</p>
+<p style="position:absolute;left:128px;bottom:64px;width:1200px;font-size:24px;color:#5A6275">5  ·  Dataset</p>
+
+</section>
+<section class="slide" id="prep" data-transition="fade" style="background:#F6F3EA;color:#17203A;font-family:'IBM Plex Sans', Arial, sans-serif;padding:96px 128px 160px;display:flex;flex-direction:column;gap:30px">
+<div style="display:flex;flex-direction:column;gap:12px">
+<p style="font-size:24px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#0B6465">Preprocessing</p>
+<h2 style="font-size:64px;font-weight:600;line-height:1.1">Quoted words become slots, so any word works</h2>
+</div>
+<div style="display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;align-items:center;gap:20px">
+<p style="font-size:24px;color:#4B5568;width:190px;flex:none">Description</p>
+<div style="flex:1;background:#FBFAF5;border:1px solid #DDD7C6;border-radius:14px;padding:16px 24px"><p style="font-size:30px">lines where ‘red’ comes before ‘blue’</p></div>
+</div>
+<div style="display:flex;align-items:center;gap:20px">
+<p style="font-size:24px;color:#4B5568;width:190px;flex:none">Model input</p>
+<div style="flex:1;background:#DCEDEA;border:1px solid #B9D8D4;border-radius:14px;padding:16px 24px"><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:28px">lines where __w0__ comes before __w1__</p></div>
+</div>
+<div style="display:flex;align-items:center;gap:20px">
+<p style="font-size:24px;color:#4B5568;width:190px;flex:none">Model output</p>
+<div style="flex:1;background:#DCEDEA;border:1px solid #B9D8D4;border-radius:14px;padding:16px 24px"><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:28px">.*__w0__.*__w1__.*</p></div>
+</div>
+<div style="display:flex;align-items:center;gap:20px">
+<p style="font-size:24px;color:#4B5568;width:190px;flex:none">Final regex</p>
+<div style="flex:1;background:#17203A;border-radius:14px;padding:16px 24px"><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:28px;color:#F2B544">.*red.*blue.*</p></div>
+</div>
+</div>
+<div style="display:flex;gap:24px">
+<div style="flex:1;display:flex;flex-direction:column;gap:6px;background:#FBFAF5;border:1px solid #DDD7C6;border-radius:16px;padding:24px">
+<h3 style="font-size:30px;font-weight:600;color:#0B6465">Input side</h3>
+<p style="font-size:24px;line-height:1.4;color:#4B5568">lowercase, word tokens, 198-word vocabulary from training only, &lt;PAD&gt; and &lt;UNK&gt;</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:6px;background:#FBFAF5;border:1px solid #DDD7C6;border-radius:16px;padding:24px">
+<h3 style="font-size:30px;font-weight:600;color:#0B6465">Output side</h3>
+<p style="font-size:24px;line-height:1.4;color:#4B5568">one token per regex character, slots as single tokens, 44 tokens, &lt;SOS&gt; and &lt;EOS&gt;</p>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1200px;font-size:24px;color:#5A6275">6  ·  Preprocessing</p>
+
+</section>
+<section class="slide" id="model" data-transition="fade" style="background:#F6F3EA;color:#17203A;font-family:'IBM Plex Sans', Arial, sans-serif;padding:96px 128px 160px;display:flex;flex-direction:column;gap:24px">
+<div style="display:flex;flex-direction:column;gap:12px">
+<p style="font-size:24px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#0B6465">Architecture</p>
+<h2 style="font-size:64px;font-weight:600;line-height:1.1">An LSTM encoder-decoder with a bridge</h2>
+</div>
+<div style="display:flex;align-items:center;gap:16px;background:#DCEDEA;border:1px solid #B9D8D4;border-radius:20px;padding:24px">
+<p style="font-size:36px;font-weight:600;width:170px;flex:none;color:#0B6465">Encoder</p>
+<div style="flex:1;display:flex;flex-direction:column;gap:4px;background:#FBFAF5;border-radius:12px;padding:14px 20px"><p style="font-size:28px;font-weight:600;line-height:1.25">Input words</p><p style="font-size:24px;line-height:1.3;color:#4B5568">tokens of the description</p></div>
+<div class="shape arrow-right" style="width:40px;height:24px;background:#0B6465"></div>
+<div style="flex:1;display:flex;flex-direction:column;gap:4px;background:#FBFAF5;border-radius:12px;padding:14px 20px"><p style="font-size:28px;font-weight:600;line-height:1.25">Embedding</p><p style="font-size:24px;line-height:1.3;color:#4B5568">198 × 128</p></div>
+<div class="shape arrow-right" style="width:40px;height:24px;background:#0B6465"></div>
+<div style="flex:1;display:flex;flex-direction:column;gap:4px;background:#FBFAF5;border-radius:12px;padding:14px 20px"><p style="font-size:28px;font-weight:600;line-height:1.25">LSTM</p><p style="font-size:24px;line-height:1.3;color:#4B5568">1 layer, 256 units</p></div>
+<div class="shape arrow-right" style="width:40px;height:24px;background:#0B6465"></div>
+<div style="flex:1;display:flex;flex-direction:column;gap:4px;background:#FBFAF5;border-radius:12px;padding:14px 20px"><p style="font-size:28px;font-weight:600;line-height:1.25">Final state</p><p style="font-size:24px;line-height:1.3;color:#4B5568">hidden and cell</p></div>
+</div>
+<div style="display:flex;align-items:center;justify-content:center;gap:20px">
+<div class="shape arrow-down" style="width:32px;height:48px;background:#17203A"></div>
+<p style="font-size:28px;line-height:1.35">Bridge: a linear layer and tanh turn the final state into the decoder’s start state</p>
+</div>
+<div style="display:flex;align-items:center;gap:16px;background:#F8E8C2;border:1px solid #E6CF98;border-radius:20px;padding:24px">
+<p style="font-size:36px;font-weight:600;width:170px;flex:none;color:#7A4B00">Decoder</p>
+<div style="flex:1;display:flex;flex-direction:column;gap:4px;background:#FBFAF5;border-radius:12px;padding:14px 20px"><p style="font-size:28px;font-weight:600;line-height:1.25">Previous regex token</p></div>
+<div class="shape arrow-right" style="width:32px;height:24px;background:#7A4B00"></div>
+<div style="flex:1;display:flex;flex-direction:column;gap:4px;background:#FBFAF5;border-radius:12px;padding:14px 20px"><p style="font-size:28px;font-weight:600;line-height:1.25">Embedding</p><p style="font-size:24px;line-height:1.3;color:#4B5568">44 × 128</p></div>
+<div class="shape arrow-right" style="width:32px;height:24px;background:#7A4B00"></div>
+<div style="flex:1;display:flex;flex-direction:column;gap:4px;background:#FBFAF5;border-radius:12px;padding:14px 20px"><p style="font-size:28px;font-weight:600;line-height:1.25">LSTM</p><p style="font-size:24px;line-height:1.3;color:#4B5568">256 units</p></div>
+<div class="shape arrow-right" style="width:32px;height:24px;background:#7A4B00"></div>
+<div style="flex:1;display:flex;flex-direction:column;gap:4px;background:#FBFAF5;border-radius:12px;padding:14px 20px"><p style="font-size:28px;font-weight:600;line-height:1.25">Linear + softmax</p><p style="font-size:24px;line-height:1.3;color:#4B5568">44 tokens</p></div>
+<div class="shape arrow-right" style="width:32px;height:24px;background:#7A4B00"></div>
+<div style="flex:1;display:flex;flex-direction:column;gap:4px;background:#FBFAF5;border-radius:12px;padding:14px 20px"><p style="font-size:28px;font-weight:600;line-height:1.25">Next regex token</p><p style="font-size:24px;line-height:1.3;color:#4B5568">stops at &lt;EOS&gt;</p></div>
+</div>
+<p style="font-size:26px;line-height:1.4;color:#4B5568">Baseline: the decoder only sees the final state. Parameters: 964,396 for the baseline, 1,375,020 with attention.</p>
+<p style="position:absolute;left:128px;bottom:64px;width:1200px;font-size:24px;color:#5A6275">7  ·  Architecture</p>
+
+</section>
+<section class="slide" id="attention" data-transition="fade" style="background:#F6F3EA;color:#17203A;font-family:'IBM Plex Sans', Arial, sans-serif;padding:96px 128px 160px;display:flex;flex-direction:column;gap:32px">
+<div style="display:flex;flex-direction:column;gap:12px">
+<p style="font-size:24px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#0B6465">The improvement: attention</p>
+<h2 style="font-size:64px;font-weight:600;line-height:1.1">The decoder looks back at every input word</h2>
+</div>
+<div style="display:flex;gap:32px;align-items:flex-start">
+<div style="flex:1.25;display:flex;flex-direction:column;gap:20px">
+<div style="display:flex;gap:24px;align-items:flex-start;background:#FBFAF5;border:1px solid #DDD7C6;border-radius:16px;padding:24px">
+<div style="width:56px;height:56px;flex:none;display:flex;align-items:center;justify-content:center;background:#0B6465;border-radius:50%"><p style="font-size:30px;font-weight:600;color:#F6F3EA">1</p></div>
+<div style="flex:1;display:flex;flex-direction:column;gap:8px">
+<h3 style="font-size:34px;font-weight:600;line-height:1.2">Score</h3>
+<p style="font-size:26px;line-height:1.4;color:#4B5568">How relevant is each input word to the next output token?</p>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;line-height:1.4">score = v^T tanh(W_s s + W_h h_i)</p>
+</div>
+</div>
+<div style="display:flex;gap:24px;align-items:flex-start;background:#FBFAF5;border:1px solid #DDD7C6;border-radius:16px;padding:24px">
+<div style="width:56px;height:56px;flex:none;display:flex;align-items:center;justify-content:center;background:#0B6465;border-radius:50%"><p style="font-size:30px;font-weight:600;color:#F6F3EA">2</p></div>
+<div style="flex:1;display:flex;flex-direction:column;gap:8px">
+<h3 style="font-size:34px;font-weight:600;line-height:1.2">Weights</h3>
+<p style="font-size:26px;line-height:1.4;color:#4B5568">Softmax over the input positions. Padding gets zero weight.</p>
+</div>
+</div>
+<div style="display:flex;gap:24px;align-items:flex-start;background:#FBFAF5;border:1px solid #DDD7C6;border-radius:16px;padding:24px">
+<div style="width:56px;height:56px;flex:none;display:flex;align-items:center;justify-content:center;background:#0B6465;border-radius:50%"><p style="font-size:30px;font-weight:600;color:#F6F3EA">3</p></div>
+<div style="flex:1;display:flex;flex-direction:column;gap:8px">
+<h3 style="font-size:34px;font-weight:600;line-height:1.2">Context</h3>
+<p style="font-size:26px;line-height:1.4;color:#4B5568">Weighted sum of the encoder states, fed to the LSTM and to the output layer.</p>
+</div>
+</div>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:24px">
+<div style="display:flex;flex-direction:column;gap:12px;background:#F8E8C2;border:1px solid #E6CF98;border-radius:16px;padding:32px">
+<h3 style="font-size:34px;font-weight:600;line-height:1.2">Why one vector is not enough</h3>
+<p style="font-size:28px;line-height:1.4">Without attention, 256 numbers must carry the whole description, and every regex token depends on that single summary.</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px;background:#DCEDEA;border:1px solid #B9D8D4;border-radius:16px;padding:32px">
+<p style="font-size:72px;font-weight:600;line-height:1.1;color:#0B6465">88.7% vs 7.1%</p>
+<p style="font-size:28px;line-height:1.4">validation exact match after one epoch, with and without attention</p>
+</div>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1200px;font-size:24px;color:#5A6275">8  ·  Attention</p>
+
+</section>
+<section class="slide" id="training" data-transition="fade" style="background:#F6F3EA;color:#17203A;font-family:'IBM Plex Sans', Arial, sans-serif;padding:96px 128px 160px;display:flex;flex-direction:column;gap:32px">
+<div style="display:flex;flex-direction:column;gap:12px">
+<p style="font-size:24px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#0B6465">Training setup</p>
+<h2 style="font-size:64px;font-weight:600;line-height:1.1">Trained on a CPU in under half an hour</h2>
+</div>
+<div style="display:flex;gap:48px;align-items:flex-start">
+<div style="flex:1;display:flex;flex-direction:column;gap:12px">
+<h3 style="font-size:36px;font-weight:600;line-height:1.2;color:#0B6465">Model</h3>
+<table style="font-size:26px">
+<tr><th style="width:42%">Setting</th><th style="width:58%">Value</th></tr>
+<tr><td>Embedding size</td><td>128</td></tr>
+<tr><td>Hidden size</td><td>256</td></tr>
+<tr><td>Layers</td><td>1 LSTM layer</td></tr>
+<tr><td>Dropout</td><td>0.3, plus 5% word dropout</td></tr>
+<tr><td>Parameters</td><td>964k, 1.38M with attention</td></tr>
+</table>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:12px">
+<h3 style="font-size:36px;font-weight:600;line-height:1.2;color:#0B6465">Optimisation</h3>
+<table style="font-size:26px">
+<tr><th style="width:38%">Setting</th><th style="width:62%">Value</th></tr>
+<tr><td>Loss</td><td>Token cross-entropy, padding ignored</td></tr>
+<tr><td>Optimiser</td><td>Adam, learning rate 0.001</td></tr>
+<tr><td>Schedule</td><td>Halved after 2 epochs without gain</td></tr>
+<tr><td>Batch size</td><td>64</td></tr>
+<tr><td>Epochs</td><td>Up to 15 (30 for one baseline), early stop</td></tr>
+<tr><td>Teacher forcing</td><td>Ratio 1.0</td></tr>
+<tr><td>Stopping</td><td>Best validation exact match</td></tr>
+</table>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1200px;font-size:24px;color:#5A6275">9  ·  Training</p>
+
+</section>
+<section class="slide" id="metrics" data-transition="fade" style="background:#F6F3EA;color:#17203A;font-family:'IBM Plex Sans', Arial, sans-serif;padding:96px 128px 160px;display:flex;flex-direction:column;gap:32px">
+<div style="display:flex;flex-direction:column;gap:12px">
+<p style="font-size:24px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#0B6465">Evaluation</p>
+<h2 style="font-size:64px;font-weight:600;line-height:1.1">Exact match is strict, so we also test behaviour</h2>
+</div>
+<div style="display:flex;flex-direction:column;gap:24px">
+<div style="display:flex;gap:24px">
+<div style="flex:1;display:flex;flex-direction:column;gap:8px;background:#FBFAF5;border:1px solid #DDD7C6;border-radius:16px;padding:28px">
+<h3 style="font-size:34px;font-weight:600;line-height:1.2;color:#0B6465">Exact match</h3>
+<p style="font-size:26px;line-height:1.4;color:#4B5568">The generated string is identical to the reference. Strict: equivalent regexes written differently count as wrong.</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:8px;background:#FBFAF5;border:1px solid #DDD7C6;border-radius:16px;padding:28px">
+<h3 style="font-size:34px;font-weight:600;line-height:1.2;color:#0B6465">Functional accuracy</h3>
+<p style="font-size:26px;line-height:1.4;color:#4B5568">Same behaviour: same accept and reject decisions as the reference on about 600 probe strings, using our own matcher for the &amp; and ~ operators.</p>
+</div>
+</div>
+<div style="display:flex;gap:24px">
+<div style="flex:1;display:flex;flex-direction:column;gap:8px;background:#FBFAF5;border:1px solid #DDD7C6;border-radius:16px;padding:28px">
+<h3 style="font-size:34px;font-weight:600;line-height:1.2;color:#0B6465">BLEU-4</h3>
+<p style="font-size:26px;line-height:1.4;color:#4B5568">N-gram overlap on regex tokens. Smooth, so it rewards near misses.</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:8px;background:#FBFAF5;border:1px solid #DDD7C6;border-radius:16px;padding:28px">
+<h3 style="font-size:34px;font-weight:600;line-height:1.2;color:#0B6465">Perplexity and token accuracy</h3>
+<p style="font-size:26px;line-height:1.4;color:#4B5568">Teacher-forced diagnostics that compare models independently of decoding.</p>
+</div>
+</div>
+</div>
+<div style="background:#F8E8C2;border:1px solid #E6CF98;border-radius:16px;padding:24px 28px">
+<p style="font-size:26px;line-height:1.4">Three test sets: new regexes in the training style, 11 held-out phrasing patterns, and 50 handwritten descriptions. The last two measure what a template-trained model cannot simply memorise.</p>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1200px;font-size:24px;color:#5A6275">10  ·  Evaluation</p>
+
+</section>
+<section class="slide" id="results" data-transition="fade" style="background:#F6F3EA;color:#17203A;font-family:'IBM Plex Sans', Arial, sans-serif;padding:96px 128px 160px;display:flex;flex-direction:column;gap:32px">
+<div style="display:flex;flex-direction:column;gap:12px">
+<p style="font-size:24px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#0B6465">Results, greedy decoding</p>
+<h2 style="font-size:64px;font-weight:600;line-height:1.1">Near perfect on new regexes, harder on new wording</h2>
+</div>
+<table style="font-size:29px">
+<tr><th style="width:25%">Exact match (%)</th><th style="width:9%;text-align:right">n</th><th style="width:22%;text-align:right">Baseline, 15 epochs</th><th style="width:22%;text-align:right">Baseline, 30 epochs</th><th style="width:22%;text-align:right">Attention, 15 max</th></tr>
+<tr><td>New regexes</td><td style="text-align:right">1,884</td><td style="text-align:right">92.4</td><td style="text-align:right">95.6</td><td style="text-align:right;font-weight:600;color:#0B6465">99.4</td></tr>
+<tr><td>New phrasings</td><td style="text-align:right">1,500</td><td style="text-align:right">75.1</td><td style="text-align:right">81.2</td><td style="text-align:right;font-weight:600;color:#0B6465">82.6</td></tr>
+<tr><td>Handwritten</td><td style="text-align:right">50</td><td style="text-align:right">94.0</td><td style="text-align:right">92.0</td><td style="text-align:right;font-weight:600;color:#0B6465">96.0</td></tr>
+</table>
+<div style="display:flex;gap:24px">
+<div style="flex:1;display:flex;flex-direction:column;gap:8px;background:#FBFAF5;border:1px solid #DDD7C6;border-radius:16px;padding:24px 28px"><p style="font-size:24px;color:#4B5568">Second attention seed</p><p style="font-size:30px;font-weight:600">99.7 / 83.3 / 96.0</p></div>
+<div style="flex:1;display:flex;flex-direction:column;gap:8px;background:#FBFAF5;border:1px solid #DDD7C6;border-radius:16px;padding:24px 28px"><p style="font-size:24px;color:#4B5568">Valid regexes</p><p style="font-size:30px;font-weight:600">99.6 to 100% everywhere</p></div>
+<div style="flex:1;display:flex;flex-direction:column;gap:8px;background:#FBFAF5;border:1px solid #DDD7C6;border-radius:16px;padding:24px 28px"><p style="font-size:24px;color:#4B5568">First version, NL-RX</p><p style="font-size:30px;font-weight:600">45.3% exact, same model</p></div>
+</div>
+<p style="font-size:26px;line-height:1.4;color:#4B5568">Exact = identical to the reference. Behaviour-based scores are 0 to 2 points higher (report, section 7). No test regex of the first two sets appears in training.</p>
+<p style="position:absolute;left:128px;bottom:64px;width:1200px;font-size:24px;color:#5A6275">11  ·  Results</p>
+
+</section>
+<section class="slide" id="findings" data-transition="fade" style="background:#F6F3EA;color:#17203A;font-family:'IBM Plex Sans', Arial, sans-serif;padding:96px 128px 160px;display:flex;flex-direction:column;gap:32px">
+<div style="display:flex;flex-direction:column;gap:12px">
+<p style="font-size:24px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#0B6465">What we learned</p>
+<h2 style="font-size:64px;font-weight:600;line-height:1.1">Attention matters most, new wording is the hard part</h2>
+</div>
+<div style="display:flex;flex-direction:column;gap:14px">
+<div style="display:flex;align-items:center;gap:32px;background:#DCEDEA;border:1px solid #B9D8D4;border-radius:16px;padding:16px 28px">
+<p style="font-size:52px;font-weight:600;line-height:1.1;width:330px;flex:none;color:#0B6465">6 of 7</p>
+<p style="font-size:26px;line-height:1.4;flex:1">baseline errors on new regexes removed by attention, against a baseline trained twice as long (4.4% wrong down to 0.6%)</p>
+</div>
+<div style="display:flex;align-items:center;gap:32px;background:#DCEDEA;border:1px solid #B9D8D4;border-radius:16px;padding:16px 28px">
+<p style="font-size:52px;font-weight:600;line-height:1.1;width:330px;flex:none;color:#0B6465">92.5%</p>
+<p style="font-size:26px;line-height:1.4;flex:1">30-epoch baseline on AND combinations, against 99.4% with attention: one vector struggles to carry two or three conditions</p>
+</div>
+<div style="display:flex;align-items:center;gap:32px;background:#DCEDEA;border:1px solid #B9D8D4;border-radius:16px;padding:16px 28px">
+<p style="font-size:52px;font-weight:600;line-height:1.1;width:330px;flex:none;color:#0B6465">1 vs 7</p>
+<p style="font-size:26px;line-height:1.4;flex:1">epochs to reach 88% validation exact match, with and without attention</p>
+</div>
+<div style="display:flex;align-items:center;gap:32px;background:#FBFAF5;border:1px solid #DDD7C6;border-radius:16px;padding:16px 28px">
+<p style="font-size:52px;font-weight:600;line-height:1.1;width:330px;flex:none;color:#4B5568">-16.8</p>
+<p style="font-size:26px;line-height:1.4;flex:1">points of exact match for the attention model on held-out phrasings (99.4 to 82.6)</p>
+</div>
+<div style="display:flex;align-items:center;gap:32px;background:#FBFAF5;border:1px solid #DDD7C6;border-radius:16px;padding:16px 28px">
+<p style="font-size:52px;font-weight:600;line-height:1.1;width:330px;flex:none;color:#4B5568">+1.4</p>
+<p style="font-size:26px;line-height:1.4;flex:1">points only over the long baseline on held-out phrasings: there the wording, not the architecture, is the limit</p>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1200px;font-size:24px;color:#5A6275">12  ·  What we learned</p>
+
+</section>
+<section class="slide" id="curves" data-transition="fade" style="background:#F6F3EA;color:#17203A;font-family:'IBM Plex Sans', Arial, sans-serif;padding:96px 128px 160px;display:flex;flex-direction:column;gap:32px">
+<div style="display:flex;flex-direction:column;gap:12px">
+<p style="font-size:24px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#0B6465">Training curves</p>
+<h2 style="font-size:64px;font-weight:600;line-height:1.1">Attention converges in a few epochs, the baseline slowly</h2>
+</div>
+<img src="img/learning_curves.png" alt="Three line charts over training epochs for the baseline and the attention model: training and validation loss, validation exact match and validation BLEU-4. The attention models reach 89 to 94% exact match after one epoch; the baseline climbs over about ten epochs." style="width:1664px;height:458px;object-fit:contain;background:#FFFFFF;border:1px solid #DDD7C6;border-radius:12px">
+<div style="display:flex;gap:24px">
+<div style="flex:1;background:#DCEDEA;border:1px solid #B9D8D4;border-radius:16px;padding:20px 24px"><p style="font-size:26px;line-height:1.35">After 2 epochs: 20% validation exact match with attention, 0% without.</p></div>
+<div style="flex:1;background:#FBFAF5;border:1px solid #DDD7C6;border-radius:16px;padding:20px 24px"><p style="font-size:26px;line-height:1.35">The baseline overfits more: loss gap of 0.15 after 60 epochs.</p></div>
+<div style="flex:1;background:#FBFAF5;border:1px solid #DDD7C6;border-radius:16px;padding:20px 24px"><p style="font-size:26px;line-height:1.35">Attention: validation loss flat after about 10 epochs, gap 0.06 to 0.09.</p></div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1200px;font-size:24px;color:#5A6275">13  ·  Training curves</p>
+
+</section>
+<section class="slide" id="heatmap" data-transition="fade" style="background:#F6F3EA;color:#17203A;font-family:'IBM Plex Sans', Arial, sans-serif;padding:96px 128px 160px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:12px">
+<p style="font-size:24px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#0B6465">Attention heatmaps</p>
+<h2 style="font-size:64px;font-weight:600;line-height:1.1">Each regex token looks at the words that justify it</h2>
+</div>
+<div style="display:flex;gap:40px;align-items:center">
+<img src="img/attention_examples.png" alt="Four attention heatmaps. Rows are generated regex tokens, columns are input words. The count 3 attends to the word 3, each literal slot attends to its quoted word, the tilde attends to not, the vowel class attends to vowel, and for blue somewhere after red the model writes red first." style="width:980px;height:660px;object-fit:contain;background:#FFFFFF;border:1px solid #DDD7C6;border-radius:12px">
+<div style="flex:1;display:flex;flex-direction:column;gap:22px">
+<div style="display:flex;flex-direction:column;gap:4px"><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:28px;font-weight:600;color:#0B6465">3</p><p style="font-size:26px;color:#4B5568">the word “3”, then “least” and “times” for the braces</p></div>
+<div style="display:flex;flex-direction:column;gap:4px"><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:28px;font-weight:600;color:#0B6465">‘cat’, ‘the’</p><p style="font-size:26px;color:#4B5568">each slot looks at its quoted word</p></div>
+<div style="display:flex;flex-direction:column;gap:4px"><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:28px;font-weight:600;color:#0B6465">~ and &amp;</p><p style="font-size:26px;color:#4B5568">the words “not” and “and”</p></div>
+<div style="display:flex;flex-direction:column;gap:4px"><p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:28px;font-weight:600;color:#0B6465">.*red.*blue.*</p><p style="font-size:26px;color:#4B5568">“blue somewhere after red”: red is written first, so the decoder reads the sentence from the end</p></div>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1200px;font-size:24px;color:#5A6275">14  ·  Attention heatmaps</p>
+
+</section>
+<section class="slide" id="examples" data-transition="fade" style="background:#F6F3EA;color:#17203A;font-family:'IBM Plex Sans', Arial, sans-serif;padding:96px 128px 160px;display:flex;flex-direction:column;gap:32px">
+<div style="display:flex;flex-direction:column;gap:12px">
+<p style="font-size:24px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#0B6465">Generated examples, attention model</p>
+<h2 style="font-size:64px;font-weight:600;line-height:1.1">What it gets right and what it gets wrong</h2>
+</div>
+<div style="display:flex;gap:32px;align-items:flex-start">
+<div style="flex:1;display:flex;flex-direction:column;gap:16px">
+<h3 style="font-size:36px;font-weight:600;line-height:1.2;color:#0B6465">Correct</h3>
+<div style="display:flex;flex-direction:column;gap:10px;background:#DCEDEA;border:1px solid #B9D8D4;border-radius:16px;padding:18px 24px">
+<p style="font-size:24px;line-height:1.35">a regular expression for text lines that have exactly 20 characters and are longer than 3 characters</p>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:25px;font-weight:600">(.{20})&amp;(~(.{0,3}))</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px;background:#DCEDEA;border:1px solid #B9D8D4;border-radius:16px;padding:18px 24px">
+<p style="font-size:24px;line-height:1.35">I want all strings where ‘table’ is repeated 4 times in a row and the length is at least 9 <em>(new phrasing)</em></p>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:25px;font-weight:600">(.*(table){4,}.*)&amp;(.{9,})</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px;background:#DCEDEA;border:1px solid #B9D8D4;border-radius:16px;padding:18px 24px">
+<p style="font-size:24px;line-height:1.35">lines where ‘blue’ comes somewhere after ‘red’ <em>(handwritten)</em></p>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:25px;font-weight:600">.*red.*blue.*</p>
+</div>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:16px">
+<h3 style="font-size:36px;font-weight:600;line-height:1.2;color:#7A4B00">Wrong (reference vs generated)</h3>
+<div style="display:flex;flex-direction:column;gap:6px;background:#F8E8C2;border:1px solid #E6CF98;border-radius:16px;padding:18px 24px">
+<p style="font-size:24px;line-height:1.35">… have the sequence “Alice” at the end but do not contain a space <em>(new phrasing)</em></p>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:23px;line-height:1.4">ref  (.*Alice)&amp;(~(.* .*))</p>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:23px;line-height:1.4">out  (Alice.*)&amp;(~(.* .*))</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:6px;background:#F8E8C2;border:1px solid #E6CF98;border-radius:16px;padding:18px 24px">
+<p style="font-size:24px;line-height:1.35">… contain the substring ‘zero’ no fewer than three times … <em>(new phrasing)</em></p>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:23px;line-height:1.4">ref  ((.*zero){3,}.*)&amp;…</p>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:23px;line-height:1.4">out  (~((.*zero){3,}.*))&amp;…</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:6px;background:#F8E8C2;border:1px solid #E6CF98;border-radius:16px;padding:18px 24px">
+<p style="font-size:24px;line-height:1.35">lines with no digits at all <em>(handwritten)</em></p>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:23px;line-height:1.4">ref  ~(.*[0-9].*)</p>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:23px;line-height:1.4">out  .{0,9}</p>
+</div>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1200px;font-size:24px;color:#5A6275">15  ·  Examples</p>
+
+</section>
+<section class="slide" id="errors" data-transition="fade" style="background:#F6F3EA;color:#17203A;font-family:'IBM Plex Sans', Arial, sans-serif;padding:96px 128px 160px;display:flex;flex-direction:column;gap:30px">
+<div style="display:flex;flex-direction:column;gap:12px">
+<p style="font-size:24px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#0B6465">Error analysis, attention model</p>
+<h2 style="font-size:64px;font-weight:600;line-height:1.1">Errors come from wording, not from syntax</h2>
+</div>
+<div style="display:flex;flex-direction:column;gap:14px">
+<p style="font-size:26px;color:#4B5568">Outcome on the 1,500 held-out phrasings</p>
+<div style="display:flex;gap:3px">
+<div style="flex:1239;display:flex;align-items:center;background:#0B6465;border-radius:10px;padding:18px 20px"><p style="font-size:30px;font-weight:600;color:#F6F3EA">1,239</p></div>
+<div style="flex:26;background:#8CC3BF;border-radius:10px"></div>
+<div style="flex:235;display:flex;align-items:center;background:#F2B544;border-radius:10px;padding:18px 20px"><p style="font-size:30px;font-weight:600;color:#17203A">235</p></div>
+</div>
+<div style="display:flex;flex-wrap:wrap;gap:12px 32px">
+<div style="display:flex;align-items:center;gap:10px"><div style="width:24px;height:24px;background:#0B6465;border-radius:6px"></div><p style="font-size:24px">Exact match, 1,239</p></div>
+<div style="display:flex;align-items:center;gap:10px"><div style="width:24px;height:24px;background:#8CC3BF;border-radius:6px"></div><p style="font-size:24px">Equivalent, written differently, 26</p></div>
+<div style="display:flex;align-items:center;gap:10px"><div style="width:24px;height:24px;background:#F2B544;border-radius:6px"></div><p style="font-size:24px">Valid but wrong, 235 (no invalid regex)</p></div>
+</div>
+</div>
+<div style="display:flex;gap:32px;align-items:flex-start">
+<div style="flex:1.2">
+<table style="font-size:26px">
+<tr><th style="width:72%">Type of the 235 wrong outputs</th><th style="width:28%;text-align:right">n</th></tr>
+<tr><td>Structure wrong, mostly a condition read as another (“at the end” as “starts with”)</td><td style="text-align:right">156</td></tr>
+<tr><td>Negation missing or extra (“no fewer than”)</td><td style="text-align:right">68</td></tr>
+<tr><td>Wrong character class</td><td style="text-align:right">8</td></tr>
+<tr><td>Only a number wrong</td><td style="text-align:right">3</td></tr>
+</table>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:12px;background:#F8E8C2;border:1px solid #E6CF98;border-radius:16px;padding:28px">
+<h3 style="font-size:32px;font-weight:600;line-height:1.2">On new regexes: 11 errors</h3>
+<ul style="font-size:25px;line-height:1.4">
+<li>6 are one unseen shape, “ends with X or Y”: the second ending becomes “contains”</li>
+<li>2 hit the 60-token output limit</li>
+<li>3 drop or change a condition in a long sentence</li>
+</ul>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1200px;font-size:24px;color:#5A6275">16  ·  Error analysis</p>
+
+</section>
+<section class="slide" id="limits" data-transition="fade" style="background:#F6F3EA;color:#17203A;font-family:'IBM Plex Sans', Arial, sans-serif;padding:96px 128px 160px;display:flex;flex-direction:column;gap:32px">
+<div style="display:flex;flex-direction:column;gap:12px">
+<p style="font-size:24px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#0B6465">Limitations and next steps</p>
+<h2 style="font-size:64px;font-weight:600;line-height:1.1">What this study cannot say, and what comes next</h2>
+</div>
+<div style="display:flex;gap:32px;align-items:flex-start">
+<div style="flex:1;display:flex;flex-direction:column;gap:16px;background:#FBFAF5;border:1px solid #DDD7C6;border-radius:16px;padding:36px">
+<h3 style="font-size:40px;font-weight:600;line-height:1.2;color:#7A4B00">Limitations</h3>
+<ul style="font-size:28px;line-height:1.4">
+<li>Template English is more regular than real requests: 99.4% is an in-distribution number</li>
+<li>The handwritten set is small (50) and mostly simple</li>
+<li>“Same behaviour” is a sampling test: we found one false “equivalent”</li>
+<li>Outputs are capped at 60 tokens</li>
+</ul>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:16px;background:#FBFAF5;border:1px solid #DDD7C6;border-radius:16px;padding:36px">
+<h3 style="font-size:40px;font-weight:600;line-height:1.2;color:#0B6465">Next steps</h3>
+<ul style="font-size:28px;line-height:1.4">
+<li>Human paraphrases of generated sentences, to make the training language more varied</li>
+<li>More constructions per condition, especially for negation</li>
+<li>A copy mechanism for literals written without quotes</li>
+<li>Exact DFA equivalence and grammar-constrained decoding</li>
+</ul>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1200px;font-size:24px;color:#5A6275">17  ·  Limitations</p>
+
+</section>
+<section class="slide" id="demo" data-transition="fade" style="background:#111A2C;color:#F1EEE5;font-family:'IBM Plex Sans', Arial, sans-serif;padding:96px 128px 160px;display:flex;flex-direction:column;gap:32px">
+<div style="display:flex;flex-direction:column;gap:12px">
+<p style="font-size:24px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#F2B544">Live demo</p>
+<h2 style="font-size:64px;font-weight:600;line-height:1.1;color:#F1EEE5">Type English, get a regex</h2>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px;background:#0B1322;border:1px solid #2C3B5C;border-radius:16px;padding:36px 40px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:26px;line-height:1.4;color:#9AA6BD">In the browser (no server), or: python src/demo.py --run results/attn</p>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:28px;line-height:1.4;color:#F1EEE5">English&gt; lines containing 'cat' at least 2 times</p>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:28px;line-height:1.4;color:#F2B544">Regex  : (.*cat){2,}.*</p>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:28px;line-height:1.4;color:#F1EEE5">English&gt; lines that contain 'error' and do not contain 'warning'</p>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:28px;line-height:1.4;color:#F2B544">Regex  : (.*error.*)&amp;(~(.*warning.*))</p>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:28px;line-height:1.4;color:#F1EEE5">English&gt; lines where 'price' comes before 'total'</p>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:28px;line-height:1.4;color:#F2B544">Regex  : .*price.*total.*</p>
+</div>
+<p style="font-size:28px;line-height:1.4;color:#B7C0D0">The website runs both trained models in JavaScript, checked against PyTorch on all 3,434 test sentences, tests the regex on your own lines and shows the attention weights.</p>
+<p style="position:absolute;left:128px;bottom:64px;width:1200px;font-size:24px;color:#9AA6BD">18  ·  Demo</p>
+
+</section>
+<section class="slide" id="wrap" data-transition="fade" style="background:#F2B544;color:#17203A;font-family:'IBM Plex Sans', Arial, sans-serif;padding:96px 128px 160px;display:flex;flex-direction:column;justify-content:space-between">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-size:24px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#17203A">Conclusion</p>
+<h1 style="font-size:88px;font-weight:600;line-height:1.1;color:#17203A">Verified data, then attention: a small LSTM writes regexes from English</h1>
+</div>
+<div style="display:flex;gap:24px">
+<div style="flex:1;display:flex;flex-direction:column;gap:8px;background:#111A2C;border-radius:16px;padding:32px">
+<p style="font-size:64px;font-weight:600;line-height:1.1;color:#F2B544">99.4%</p>
+<p style="font-size:26px;line-height:1.4;color:#F1EEE5">exact match on regexes never seen in training (95.6% without attention, trained twice as long)</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:8px;background:#111A2C;border-radius:16px;padding:32px">
+<p style="font-size:64px;font-weight:600;line-height:1.1;color:#F2B544">82.6%</p>
+<p style="font-size:26px;line-height:1.4;color:#F1EEE5">exact match on sentence patterns held out of training, 48 of 50 handwritten</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:8px;background:#111A2C;border-radius:16px;padding:32px">
+<p style="font-size:64px;font-weight:600;line-height:1.1;color:#F2B544">Next</p>
+<p style="font-size:26px;line-height:1.4;color:#F1EEE5">more varied training language, especially for negation</p>
+</div>
+</div>
+<p style="font-size:44px;font-weight:600;color:#17203A">Questions?</p>
+<p style="position:absolute;left:128px;bottom:64px;width:1200px;font-size:24px;color:#17203A">19  ·  Conclusion</p>
+
+</section>
+    </div>
+  </div>
+  <div class="notes" id="notes" hidden aria-live="polite"></div>
+  <div class="bar" role="toolbar" aria-label="Slide controls">
+    <button type="button" id="prev" aria-label="Previous slide">&larr; Prev</button>
+    <span class="counter" id="counter" aria-live="polite">1 / 19</span>
+    <button type="button" id="next" aria-label="Next slide">Next &rarr;</button>
+    <button type="button" id="notes-btn" aria-pressed="false">Speaker notes</button>
+    <button type="button" id="fs">Full screen</button>
+  </div>
+</div>
+<script>
+const NOTES = ["Welcome. This project builds a sequence-to-sequence model from scratch that reads an English description of a set of text lines and writes the regular expression for it. The example on the slide is the whole task in one picture: English on the left, the regex on the right. I will explain why we built our own verified dataset, then the model, the experiments, and finish with a live demo in the browser.", "Three outputs of the final model, all exactly right. The input is a plain English description of the lines to match, and the output is a regular expression that must match the whole line. The dialect has two operators that ordinary regular expressions lack: ampersand for and, tilde for not. They make combinations of conditions easy to write, and our own matcher can run them.", "We started with the standard dataset, NL-RX, and got 45 percent exact match. Looking at the outputs we found that some labels do not mean what the English says. Here the description says the string dog at least two times, but the label only accepts two adjacent copies, so a line like dog and dog is rejected. The model reproduced the label exactly, which is correct by the benchmark and wrong for a person. Rather than train on labels we could not trust, we built a dataset where every label is checked.", "The generator first draws a meaning, a small tree of conditions such as at least two times cat. From that one tree it writes the English, choosing among many phrasings, and the regular expression. Separately, the same tree is evaluated by a plain Python function that never looks at the regex. On roughly three hundred probe strings the regex, run through our own matcher, and the Python function must give the same answer every time; a single disagreement stops the build. We also throw away meanings that accept every line or no line, such as starts with a digit and starts with a letter, 5,251 of them.", "The generator knows thirteen kinds of condition, such as contains, starts with, at least N times, N times in a row, before, immediately followed by, length and made only of, and combines them with not, and, or. Sentences come from over two hundred phrasing templates. We split by regex, so the test regexes are new to the model. Because the in-distribution test could be too easy, we built two harder tests: one with sentence patterns that never appear in training, and fifty descriptions written by hand. For the handwritten set most regexes are simple, so it tests wording rather than new structure.", "Literal text is the one thing the model cannot know in advance, since a user can ask for any word. So before the model sees a description, every quoted literal is replaced by a numbered slot, in order of appearance. The model learns to put the slots in the right place in the regex, and afterwards we put the real words back, escaping special characters. The rest is standard: lowercase word tokens with a vocabulary built from the training split only, and character-level regex tokens with the four special tokens required by the course.", "This is the baseline architecture, written with PyTorch building blocks: embeddings, LSTM layers and linear layers. The encoder reads the description and produces a final hidden and cell state. A small bridge, a linear layer followed by tanh, turns that into the decoder’s starting state. The decoder then generates one regex token at a time, feeding back its previous token, and stops when it predicts the end token or reaches 60 tokens. In the baseline, that one final state is the only channel from input to output, which is the weakness attention fixes.", "Our one planned improvement is additive attention. At each decoding step, the decoder state is compared with every encoder state to get a score, the scores are turned into weights with a softmax, and the weighted sum becomes a context vector that is used both as an extra LSTM input and in the output layer. Padding positions are masked out. The motivation is the bottleneck of a single fixed-size vector. The number on the right is concrete evidence from the logs: after a single epoch the attention model already gets 88.7 percent of validation regexes exactly right, while the baseline is at 7 percent.", "All models are small, so everything trains on a CPU. The loss is token-level cross-entropy with padding ignored. With teacher forcing at 1.0 the decoder is always fed the gold previous token during training. The best epoch is chosen by validation exact match with early stopping. Besides normal dropout we replace five percent of the input words by the unknown token during training, so the model learns not to rely on every single word. The attention model trained in 25 minutes and stopped after 11 epochs; its best epoch was the seventh.", "One metric is not enough for this task. Exact match is the strictest, but many regexes are equivalent while written differently, so we added functional accuracy: a generated regex counts as correct if it accepts and rejects the same probe strings as the reference. Python’s own regex module cannot evaluate the intersection and complement operators of this dataset, so we wrote a small matcher. This is a sampling test, not a proof of equivalence. Because the generator writes one canonical regex per meaning, exact match is meaningful here, and we use the behavioural score as a second view. The key design choice is the three test sets: an in-distribution score alone would say little about a model trained on generated sentences.", "This is the main table. On regexes the model has never seen, written in the training style, the attention model is almost perfect: 99.4 percent exact. The baseline without attention is at 92.4 after the same 15 epochs, and 95.6 when trained twice as long. The interesting rows are the harder tests. On sentence patterns held out of training, exact match drops to 82.6 percent; there the long baseline is close behind at 81.2, so attention helps much less with new wording. On fifty handwritten descriptions the attention model gets 48 right; with fifty examples, one example is two points. For comparison, the same architecture on the original NL-RX data reached 45 percent, but most of that gap comes from the labels, not the model.", "Four lessons. First, attention removes six out of seven of the baseline's errors on new regexes, even when the baseline is trained twice as long. Second, the baseline's errors are concentrated in combinations of conditions, which is exactly the bottleneck attention addresses: a single vector must carry two or three conditions with their literals and numbers. Third, attention also trains much faster. Fourth, and most important for honesty: on sentence patterns the model never saw, it loses about seventeen points. And on that harder test the long baseline is only 1.4 points behind, so what limits both models there is what they learned from the templates. Beam search, by the way, does not change the attention model's outputs.", "Left: dashed lines are training loss, solid lines validation loss. Middle: validation exact match per epoch. Right: validation BLEU. The attention model is at 89 percent exact match after one epoch and above 99 percent after four. The baseline climbs over about ten epochs, reaches 94 percent at epoch 14 and 96 percent at epoch 28. The 15-epoch baseline is the first half of the same run, so its curve is hidden under the longer one. Training and validation losses stay close for both models, so there is no sign of overfitting on this data; validation loss is even lower than training loss because dropout is only active during training.", "Each panel is one description. Rows are the regex tokens the model generated, columns are the input words, and brighter means more attention. The count attends to the number in the sentence; each literal slot attends to its quoted word; the tilde attends to not, the ampersand to and; the vowel class attends to vowel. The bottom right panel is the most telling: the sentence mentions blue first, but the regex must start with red, and the decoder indeed looks at the last word first. That reordering is impossible to do well with a single summary vector.", "Left: three exact matches, one in the training style, one with a held-out sentence pattern and one handwritten, where the model also has to reorder the two literals. Right: three failures, and they are instructive. Have Alice at the end is a held-out construction, and the model reads it as starts with. No fewer than three times contains the words fewer than, and the model follows them, flipping the meaning. No digits at all uses a negation the generator never produces. In every case the output is a valid regex that means something else.", "On the held-out phrasings, 1,239 of 1,500 outputs are exact and 26 more are equivalent. All 235 wrong outputs are valid regexes, so the syntax is learned; the errors are about meaning. Two thirds have the wrong structure, mostly one condition read as another, typically a held-out construction such as have X at the end read as a construction the model knows. Most of the rest are negations: no fewer than is read as fewer than. On new regexes in the training style only 11 outputs are wrong, and six of them are the same unseen combination, ends with X or Y. The model has learned constructions, not the meaning of each word on its own.", "Being honest about limits matters here. The sentences are generated from templates, so the 99.4 percent is an in-distribution score; the held-out phrasings and the handwritten set are the more honest estimates, and the handwritten set is small. The behavioural check is a sampling test, and we found one case where it called a wrong regex equivalent, because no probe string had the right shape. The most useful next step is more varied training language, ideally human paraphrases of the generated sentences, since new wording is where the model fails.", "Switch to the website here. Click the first examples, since they work, and show the line tester and the attention view. Then ask the audience for a description of their own, with any word in quotes. Be ready for it to fail on unusual wording; the harder-cases buttons show typical failures on purpose, and explaining them is part of the analysis. Everything runs in the browser, so the demo works without a network once the page has loaded.", "To close. The first lesson is about data: on a benchmark whose labels sometimes contradict their English, the same model looked mediocre; with verified labels it learns the task. The second is about the model: attention removes nine out of ten errors and trains much faster. The third is about evaluation: an in-distribution score of 99 percent says little on its own, so we tested on held-out sentence patterns and handwritten descriptions, where the model is at 83 and 96 percent. New wording, especially negation, is the next thing to work on. Thank you, happy to take questions."];
+const params = new URLSearchParams(location.search);
+const printMode = params.has("print");
+if (params.has("embed")) document.getElementById("app").classList.add("embed");
+if (printMode) document.documentElement.classList.add("print");
+const slides = Array.from(document.querySelectorAll(".slide"));
+const stage = document.getElementById("stage"), viewport = document.getElementById("viewport");
+const notesEl = document.getElementById("notes"), counter = document.getElementById("counter");
+let idx = 0;
+
+function fit() {
+  if (printMode) return;
+  const s = Math.min(viewport.clientWidth / 1920, viewport.clientHeight / 1080);
+  stage.style.transform = `translate(${-960 * s}px, ${-540 * s}px) scale(${s})`;
+}
+function show(i, updateHash = true) {
+  idx = Math.max(0, Math.min(slides.length - 1, i));
+  slides.forEach((s, k) => s.classList.toggle("active", k === idx));
+  counter.textContent = `${idx + 1} / ${slides.length}`;
+  notesEl.textContent = NOTES[idx] || "No notes for this slide.";
+  if (updateHash) { try { history.replaceState(null, "", "#" + (idx + 1)); } catch (e) {} }
+}
+document.getElementById("prev").onclick = () => show(idx - 1);
+document.getElementById("next").onclick = () => show(idx + 1);
+const nbtn = document.getElementById("notes-btn");
+nbtn.onclick = () => { notesEl.hidden = !notesEl.hidden; nbtn.setAttribute("aria-pressed", String(!notesEl.hidden)); fit(); };
+const fsBtn = document.getElementById("fs");
+fsBtn.onclick = () => {
+  if (document.fullscreenElement) document.exitFullscreen();
+  else document.documentElement.requestFullscreen?.().catch(() => {});
+};
+document.addEventListener("fullscreenchange", () => { fsBtn.textContent = document.fullscreenElement ? "Exit full screen" : "Full screen"; setTimeout(fit, 50); });
+document.addEventListener("keydown", (e) => {
+  if (e.metaKey || e.ctrlKey || e.altKey) return;
+  const k = e.key;
+  if (k === "ArrowRight" || k === "PageDown" || k === " " || k === "Enter") { e.preventDefault(); show(idx + 1); }
+  else if (k === "ArrowLeft" || k === "PageUp" || k === "Backspace") { e.preventDefault(); show(idx - 1); }
+  else if (k === "Home") show(0);
+  else if (k === "End") show(slides.length - 1);
+  else if (k === "f" || k === "F") fsBtn.click();
+  else if (k === "n" || k === "N") nbtn.click();
+});
+let x0 = null;
+viewport.addEventListener("touchstart", (e) => { x0 = e.touches[0].clientX; }, { passive: true });
+viewport.addEventListener("touchend", (e) => {
+  if (x0 === null) return;
+  const dx = e.changedTouches[0].clientX - x0; x0 = null;
+  if (Math.abs(dx) > 50) show(idx + (dx < 0 ? 1 : -1));
+});
+viewport.addEventListener("click", (e) => {
+  if (e.target.closest("a")) return;
+  const r = viewport.getBoundingClientRect();
+  show(idx + (e.clientX - r.left > r.width / 2 ? 1 : -1));
+});
+window.addEventListener("resize", fit);
+window.addEventListener("hashchange", () => show((parseInt(location.hash.slice(1), 10) || 1) - 1, false));
+if (printMode) slides.forEach((s) => s.classList.add("active"));
+show((parseInt(location.hash.slice(1), 10) || 1) - 1, false);
+fit();
+window.__ready = true;
+</script>
+</body>
+</html>

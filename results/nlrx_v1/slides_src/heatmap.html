@@ -1,0 +1,29 @@
+<section id="heatmap" data-transition="fade" style="background:#F6F3EA;color:#17203A;font-family:'IBM Plex Sans', Arial, sans-serif;padding:96px 128px 160px;display:flex;flex-direction:column;gap:32px">
+<div style="display:flex;flex-direction:column;gap:12px">
+<p style="font-size:24px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#0B6465">Attention heatmaps</p>
+<h2 style="font-size:64px;font-weight:600;line-height:1.1">Each regex token looks at the right words</h2>
+</div>
+<div style="display:flex;gap:40px;align-items:flex-start">
+<img src="/_blob/4805ce116864ff27f218f6b647cc45fd" alt="Four attention heatmaps for test sentences. Rows are generated regex tokens, columns are input words. Bright cells link the vowel class to the word vowel, the repetition counter to the words 7 or more, the complement operator to the word not, and the dog token to the word dog." style="width:1050px;height:675px;object-fit:contain;background:#FFFFFF;border:1px solid #DDD7C6;border-radius:12px">
+<div style="flex:1;display:flex;flex-direction:column;justify-content:space-between;gap:16px">
+<div style="display:flex;flex-direction:column;gap:6px;background:#FBFAF5;border:1px solid #DDD7C6;border-radius:16px;padding:20px 24px">
+<p style="font-size:26px;color:#4B5568">the word “vowel”</p>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:28px;font-weight:600;color:#0B6465">[AEIOUaeiou]</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:6px;background:#FBFAF5;border:1px solid #DDD7C6;border-radius:16px;padding:20px 24px">
+<p style="font-size:26px;color:#4B5568">“7 or more times”</p>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:28px;font-weight:600;color:#0B6465">{7,}</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:6px;background:#FBFAF5;border:1px solid #DDD7C6;border-radius:16px;padding:20px 24px">
+<p style="font-size:26px;color:#4B5568">the word “not”</p>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:28px;font-weight:600;color:#0B6465">~</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:6px;background:#FBFAF5;border:1px solid #DDD7C6;border-radius:16px;padding:20px 24px">
+<p style="font-size:26px;color:#4B5568">the word “dog”</p>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:28px;font-weight:600;color:#0B6465">dog</p>
+</div>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1200px;font-size:24px;color:#5A6275">12  ·  Attention heatmaps</p>
+<aside>Each panel is one test sentence. Rows are the regex tokens the model generated, columns are the input words, and brighter means more attention. While writing the long vowel class, the decoder attends almost entirely to the word vowel. The repetition counter attends to the number and to the words more and times. The complement operator attends to the word not. This is the kind of evidence that the model is learning an alignment between English phrases and regex pieces, not just memorising patterns.</aside>
+</section>

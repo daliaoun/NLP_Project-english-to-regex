@@ -1,0 +1,17 @@
+[base] params=964,396  train=37586 val=2000
+[base] ep 01 train 0.700 | val loss 0.350 ppl 1.42 tokacc 0.864 EM 0.070 BLEU 51.2 | 78s  *
+[base] ep 02 train 0.258 | val loss 0.234 ppl 1.26 tokacc 0.902 EM 0.131 BLEU 68.0 | 75s  *
+[base] ep 03 train 0.166 | val loss 0.155 ppl 1.17 tokacc 0.942 EM 0.353 BLEU 77.7 | 74s  *
+[base] ep 04 train 0.108 | val loss 0.083 ppl 1.09 tokacc 0.972 EM 0.613 BLEU 90.5 | 73s  *
+[base] ep 05 train 0.073 | val loss 0.051 ppl 1.05 tokacc 0.983 EM 0.763 BLEU 93.9 | 73s  *
+[base] ep 06 train 0.053 | val loss 0.038 ppl 1.04 tokacc 0.988 EM 0.828 BLEU 95.8 | 75s  *
+[base] ep 07 train 0.043 | val loss 0.027 ppl 1.03 tokacc 0.992 EM 0.885 BLEU 96.9 | 74s  *
+[base] ep 08 train 0.037 | val loss 0.023 ppl 1.02 tokacc 0.993 EM 0.901 BLEU 97.3 | 73s  *
+[base] ep 09 train 0.033 | val loss 0.021 ppl 1.02 tokacc 0.994 EM 0.908 BLEU 97.2 | 74s  *
+[base] ep 10 train 0.030 | val loss 0.018 ppl 1.02 tokacc 0.994 EM 0.914 BLEU 97.7 | 77s  *
+[base] ep 11 train 0.028 | val loss 0.020 ppl 1.02 tokacc 0.993 EM 0.907 BLEU 97.0 | 76s
+[base] ep 12 train 0.027 | val loss 0.014 ppl 1.01 tokacc 0.996 EM 0.936 BLEU 98.3 | 76s  *
+[base] ep 13 train 0.025 | val loss 0.014 ppl 1.01 tokacc 0.996 EM 0.936 BLEU 98.4 | 82s
+[base] ep 14 train 0.024 | val loss 0.014 ppl 1.01 tokacc 0.996 EM 0.943 BLEU 98.4 | 74s  *
+[base] ep 15 train 0.022 | val loss 0.012 ppl 1.01 tokacc 0.996 EM 0.936 BLEU 98.4 | 75s
+[base] done: {'best_epoch': 14, 'best_val_em': 0.943, 'epochs_run': 15, 'train_minutes': 18.838031005859374, 'n_params': 964396}

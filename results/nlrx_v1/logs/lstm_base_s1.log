@@ -1,0 +1,32 @@
+[lstm_base_s1] params=998,443  train=8001 val=999
+[lstm_base_s1] ep 01 train 1.272 | val loss 0.685 ppl 1.98 tokacc 0.763 EM 0.000 BLEU 25.2 | 27s  *
+[lstm_base_s1] ep 02 train 0.707 | val loss 0.594 ppl 1.81 tokacc 0.781 EM 0.000 BLEU 30.7 | 26s
+[lstm_base_s1] ep 03 train 0.636 | val loss 0.540 ppl 1.72 tokacc 0.794 EM 0.000 BLEU 33.3 | 26s
+[lstm_base_s1] ep 04 train 0.580 | val loss 0.496 ppl 1.64 tokacc 0.801 EM 0.001 BLEU 33.7 | 26s  *
+[lstm_base_s1] ep 05 train 0.527 | val loss 0.447 ppl 1.56 tokacc 0.823 EM 0.000 BLEU 36.1 | 26s
+[lstm_base_s1] ep 06 train 0.469 | val loss 0.397 ppl 1.49 tokacc 0.843 EM 0.001 BLEU 38.5 | 25s
+[lstm_base_s1] ep 07 train 0.426 | val loss 0.356 ppl 1.43 tokacc 0.863 EM 0.003 BLEU 45.3 | 25s  *
+[lstm_base_s1] ep 08 train 0.383 | val loss 0.332 ppl 1.39 tokacc 0.871 EM 0.008 BLEU 44.9 | 27s  *
+[lstm_base_s1] ep 09 train 0.345 | val loss 0.303 ppl 1.35 tokacc 0.882 EM 0.014 BLEU 51.7 | 26s  *
+[lstm_base_s1] ep 10 train 0.314 | val loss 0.282 ppl 1.33 tokacc 0.889 EM 0.018 BLEU 56.0 | 26s  *
+[lstm_base_s1] ep 11 train 0.289 | val loss 0.273 ppl 1.31 tokacc 0.893 EM 0.026 BLEU 54.7 | 25s  *
+[lstm_base_s1] ep 12 train 0.268 | val loss 0.252 ppl 1.29 tokacc 0.900 EM 0.032 BLEU 55.2 | 25s  *
+[lstm_base_s1] ep 13 train 0.256 | val loss 0.241 ppl 1.27 tokacc 0.906 EM 0.069 BLEU 57.0 | 25s  *
+[lstm_base_s1] ep 14 train 0.234 | val loss 0.227 ppl 1.26 tokacc 0.914 EM 0.096 BLEU 63.8 | 25s  *
+[lstm_base_s1] ep 15 train 0.215 | val loss 0.213 ppl 1.24 tokacc 0.923 EM 0.136 BLEU 70.2 | 26s  *
+[lstm_base_s1] ep 16 train 0.191 | val loss 0.201 ppl 1.22 tokacc 0.932 EM 0.181 BLEU 76.7 | 26s  *
+[lstm_base_s1] ep 17 train 0.174 | val loss 0.191 ppl 1.21 tokacc 0.937 EM 0.200 BLEU 76.1 | 26s  *
+[lstm_base_s1] ep 18 train 0.159 | val loss 0.187 ppl 1.21 tokacc 0.939 EM 0.228 BLEU 77.8 | 25s  *
+[lstm_base_s1] ep 19 train 0.147 | val loss 0.181 ppl 1.20 tokacc 0.941 EM 0.235 BLEU 79.4 | 26s  *
+[lstm_base_s1] ep 20 train 0.136 | val loss 0.174 ppl 1.19 tokacc 0.945 EM 0.258 BLEU 80.6 | 27s  *
+[lstm_base_s1] ep 21 train 0.128 | val loss 0.185 ppl 1.20 tokacc 0.943 EM 0.267 BLEU 79.6 | 26s  *
+[lstm_base_s1] ep 22 train 0.120 | val loss 0.174 ppl 1.19 tokacc 0.946 EM 0.283 BLEU 81.8 | 27s  *
+[lstm_base_s1] ep 23 train 0.116 | val loss 0.173 ppl 1.19 tokacc 0.947 EM 0.305 BLEU 81.9 | 28s  *
+[lstm_base_s1] ep 24 train 0.108 | val loss 0.173 ppl 1.19 tokacc 0.947 EM 0.292 BLEU 81.7 | 26s
+[lstm_base_s1] ep 25 train 0.099 | val loss 0.176 ppl 1.19 tokacc 0.948 EM 0.304 BLEU 82.2 | 29s
+[lstm_base_s1] ep 26 train 0.093 | val loss 0.171 ppl 1.19 tokacc 0.948 EM 0.297 BLEU 82.0 | 26s
+[lstm_base_s1] ep 27 train 0.087 | val loss 0.178 ppl 1.19 tokacc 0.949 EM 0.307 BLEU 81.3 | 29s  *
+[lstm_base_s1] ep 28 train 0.083 | val loss 0.176 ppl 1.19 tokacc 0.949 EM 0.328 BLEU 82.7 | 28s  *
+[lstm_base_s1] ep 29 train 0.078 | val loss 0.181 ppl 1.20 tokacc 0.949 EM 0.317 BLEU 82.1 | 28s
+[lstm_base_s1] ep 30 train 0.063 | val loss 0.176 ppl 1.19 tokacc 0.951 EM 0.341 BLEU 83.3 | 27s  *
+[lstm_base_s1] done: {'best_epoch': 30, 'best_val_em': 0.34134134134134136, 'epochs_run': 30, 'train_minutes': 13.196056067943573, 'n_params': 998443}

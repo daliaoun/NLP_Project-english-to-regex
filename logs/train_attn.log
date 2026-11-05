@@ -1,0 +1,14 @@
+[attn] params=1,375,020  train=37586 val=2000
+[attn] ep 01 train 0.374 | val loss 0.029 ppl 1.03 tokacc 0.993 EM 0.887 BLEU 96.3 | 138s  *
+[attn] ep 02 train 0.039 | val loss 0.012 ppl 1.01 tokacc 0.997 EM 0.963 BLEU 98.6 | 134s  *
+[attn] ep 03 train 0.026 | val loss 0.003 ppl 1.00 tokacc 0.999 EM 0.988 BLEU 99.8 | 132s  *
+[attn] ep 04 train 0.022 | val loss 0.001 ppl 1.00 tokacc 1.000 EM 0.998 BLEU 100.0 | 134s  *
+[attn] ep 05 train 0.018 | val loss 0.001 ppl 1.00 tokacc 1.000 EM 0.997 BLEU 100.0 | 133s
+[attn] ep 06 train 0.019 | val loss 0.001 ppl 1.00 tokacc 1.000 EM 0.999 BLEU 100.0 | 139s  *
+[attn] ep 07 train 0.017 | val loss 0.001 ppl 1.00 tokacc 1.000 EM 1.000 BLEU 100.0 | 141s  *
+[attn] ep 08 train 0.016 | val loss 0.001 ppl 1.00 tokacc 1.000 EM 0.995 BLEU 99.9 | 136s
+[attn] ep 09 train 0.016 | val loss 0.001 ppl 1.00 tokacc 1.000 EM 0.999 BLEU 100.0 | 135s
+[attn] ep 10 train 0.015 | val loss 0.001 ppl 1.00 tokacc 1.000 EM 0.999 BLEU 100.0 | 133s
+[attn] ep 11 train 0.016 | val loss 0.001 ppl 1.00 tokacc 1.000 EM 0.999 BLEU 100.0 | 136s
+[attn] early stop (no val-EM gain for 4 epochs)
+[attn] done: {'best_epoch': 7, 'best_val_em': 0.9995, 'epochs_run': 11, 'train_minutes': 24.880625212192534, 'n_params': 1375020}
