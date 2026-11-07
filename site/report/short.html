@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>From English to Regular Expressions: short report</title>
+<style>
+@font-face{font-family:"Recursive";font-style:oblique 0deg 15deg;font-weight:300 1000;font-display:swap;src:url(../fonts/recursive-latin-full-normal.woff2) format("woff2-variations")}
+:root{--ink:#1C2340;--muted:#565E7C;--rule:#D9DEEA;--cobalt:#2D45D8;--marker:#FFE14D;--paper:#F3F5F9}
+*{box-sizing:border-box}
+html{background:var(--paper)}
+body{margin:0;color:var(--ink);font-family:"Recursive",system-ui,sans-serif;font-variation-settings:"MONO" 0,"CASL" 0;font-size:10.4pt;line-height:1.5}
+.page{width:210mm;height:297mm;overflow:hidden;margin:0 auto 24px;background:#fff;padding:17mm 18mm 15mm;position:relative}
+@media screen and (max-width:820px){.page{width:auto;height:auto;overflow:visible;padding:28px 20px;margin:0}}
+h1{font-size:23pt;line-height:1.05;margin:0;font-weight:780;letter-spacing:-.3px;font-variation-settings:"MONO" 0,"CASL" .6}
+.sub{font-size:12pt;margin:5px 0 0;font-weight:560}
+.meta{color:var(--muted);margin:6px 0 0;font-size:9.6pt}
+h2{font-size:12.5pt;margin:15px 0 4px;font-weight:720;font-variation-settings:"MONO" 0,"CASL" .6;display:flex;gap:8px;align-items:baseline}
+h2 span{color:var(--cobalt);font-variation-settings:"MONO" 1,"CASL" 1}
+p{margin:4px 0}
+code{font-variation-settings:"MONO" 1,"CASL" 0;font-size:9.4pt;background:#EEF1F8;padding:0 4px;border-radius:3px;white-space:nowrap}
+.rx{font-variation-settings:"MONO" 1,"CASL" 1;color:var(--cobalt);font-weight:650;background:none;padding:0}
+strong{font-weight:700}
+.lead{font-size:11pt;line-height:1.48;margin-top:12px;padding:9px 12px;border-left:3px solid var(--cobalt);background:#F6F8FD}
+.lead mark{background:linear-gradient(transparent 55%,var(--marker) 55%);color:inherit;padding:0 1px}
+table{border-collapse:collapse;width:100%;font-size:9.5pt;margin:6px 0 2px}
+th,td{text-align:left;padding:3.5px 7px;border-bottom:1px solid var(--rule)}
+th{font-weight:650;color:var(--muted);font-size:9pt}
+td.n{text-align:right;font-variant-numeric:tabular-nums}
+.chart{margin:6px 0 2px}
+.caption{font-size:8.6pt;color:var(--muted);margin:0 0 4px}
+ul{margin:4px 0;padding-left:16px}
+li{margin:3px 0}
+.foot{position:absolute;left:18mm;right:18mm;bottom:8mm;display:flex;justify-content:space-between;color:var(--muted);font-size:8pt}
+@media screen and (max-width:820px){.foot{position:static;margin-top:16px}}
+.refs{font-size:8.8pt;color:var(--muted);margin-top:8px}
+@page{size:A4;margin:0}
+@media print{html{background:#fff}.page{margin:0;box-shadow:none;page-break-after:always}.page:last-child{page-break-after:auto}}
+</style>
+</head>
+<body>
+<section class="page">
+<h1>From English to Regular Expressions</h1>
+<p class="sub">An encoder-decoder with attention, trained on a verified dataset</p>
+<p class="meta">NLP course project (text generation with encoder-decoder architectures), Université Paris Dauphine Tunis. Mohamed Ali Aoun.</p>
+
+<p class="lead">A small LSTM encoder-decoder with attention, built from scratch, turns English descriptions into correct regular expressions: <mark><strong>99.4%</strong> exact match on unseen regexes</mark>, <strong>82.6%</strong> on unseen sentence patterns and <strong>48 of 50</strong> handwritten descriptions.</p>
+
+<h2><span>1</span>Task</h2>
+<p>Given a short English description of a set of text lines, generate a regex that matches exactly those lines (the whole line). For example, “lines containing ‘cat’ at least 2 times” gives <code class="rx">(.*cat){2,}.*</code>, and “lines that start with a capital letter and end with a number” gives <code class="rx">([A-Z].*)&amp;(.*[0-9])</code>, where <code>&amp;</code> means <em>and</em> and <code>~</code> means <em>not</em>. Regexes are formal, so every output can be run and checked.</p>
+
+<h2><span>2</span>Dataset: VeriRegex</h2>
+<p>A first version on the NL-RX benchmark reached 45.3% exact match, but its labels sometimes contradict their English: “‘dog’ at least 2 times” is labelled <code class="rx">.*(dog){2,}.*</code>, which only accepts adjacent copies and rejects “dog and dog”. We therefore built <strong>VeriRegex</strong>. Each example comes from a <strong>meaning tree</strong> (13 condition types, such as contains, starts with, at least N times, before, length, combined with not, and, or). The tree yields an English description, chosen among 216 phrasing templates, and one canonical regex. An independent Python predicate evaluates the same tree, and on about 300 probe strings per example the regex and the predicate must agree: <strong>no disagreement ever occurred</strong>. 5,251 trees that matched every line or none were discarded.</p>
+<table>
+<tr><th>Split (by regex structure)</th><th style="text-align:right">Pairs</th><th>What it tests</th></tr>
+<tr><td>Train</td><td class="n">37,586</td><td>14,345 distinct regex structures</td></tr>
+<tr><td>Test: new regexes</td><td class="n">1,884</td><td>combinations never seen in training</td></tr>
+<tr><td>Test: new phrasings</td><td class="n">1,500</td><td>11 sentence patterns held out of training</td></tr>
+<tr><td>Test: handwritten</td><td class="n">50</td><td>free wording, written by hand</td></tr>
+</table>
+
+<h2><span>3</span>Exploratory analysis and preprocessing</h2>
+<p>Descriptions average 14 words (max 37) and regexes 17 tokens (max 67); the two lengths correlate (r = 0.78). The training vocabulary has 194 words, of which the 100 most frequent cover 91% of tokens. No test regex or description appears in training; unknown words are 0% in the new-regex test, 0.7% in the new-phrasing test and 1.2% in the handwritten set. Preprocessing: quoted literals become slots (<code>__w0__</code>, <code>__w1__</code>, in order of appearance) in the description and the regex, and are restored after decoding, so the model handles any word; then lowercase, word tokens on the source side and character tokens on the regex side, vocabularies from training only with <code>&lt;PAD&gt;</code>, <code>&lt;UNK&gt;</code>, <code>&lt;SOS&gt;</code>, <code>&lt;EOS&gt;</code>, length-bucketed padded batches (6% padding instead of 58%), and 5% word dropout.</p>
+
+<div class="foot"><span>From English to Regular Expressions</span><span>1 / 2</span></div>
+</section>
+
+<section class="page">
+<h2 style="margin-top:0"><span>4</span>Model and training</h2>
+<p>Embedding (128) and a 1-layer LSTM encoder (hidden 256); its final state, through a linear and tanh bridge, initialises an LSTM decoder with hand-written additive (Bahdanau) attention over the encoder states. The baseline is the same network without attention. 1.38M parameters (0.96M without attention), cross-entropy with teacher forcing, Adam, early stopping on validation exact match; 25 minutes on a CPU for the attention model. Evaluation: exact match, behavioural equivalence on probe strings, BLEU-4, valid-regex rate.</p>
+<h2><span>5</span>Results</h2>
+<div class="chart">
+<svg viewBox="0 0 640 196" width="100%" role="img" aria-label="Exact match per test set. New regexes: baseline 15 epochs 92.4, baseline 30 epochs 95.6, attention 99.4. New phrasings: 75.1, 81.2, 82.6. Handwritten: 94.0, 92.0, 96.0.">
+  <style>
+    text{font-family:Recursive,sans-serif;font-size:11px;fill:#1C2340}
+    .ax{fill:#565E7C;font-size:10px}.lbl{font-size:12px;font-weight:600}.val{font-size:10px;fill:#565E7C}.best{font-weight:700;fill:#2D45D8}
+  </style>
+  <!-- x scale: 70% -> 150, 100% -> 620 ; 15.667 px per point -->
+  <g stroke="#D9DEEA">
+    <line x1="150" y1="34" x2="150" y2="168"/><line x1="306.7" y1="34" x2="306.7" y2="168"/><line x1="463.3" y1="34" x2="463.3" y2="168"/><line x1="620" y1="34" x2="620" y2="168"/>
+  </g>
+  <text class="ax" x="150" y="184" text-anchor="middle">70%</text><text class="ax" x="306.7" y="184" text-anchor="middle">80%</text>
+  <text class="ax" x="463.3" y="184" text-anchor="middle">90%</text><text class="ax" x="620" y="184" text-anchor="middle">100%</text>
+  <!-- legend -->
+  <circle cx="156" cy="12" r="5" fill="#C9CEDD"/><text x="166" y="16">Baseline, 15 epochs</text>
+  <circle cx="300" cy="12" r="5" fill="#7C86A6"/><text x="310" y="16">Baseline, 30 epochs</text>
+  <circle cx="444" cy="12" r="5" fill="#2D45D8"/><text x="454" y="16">LSTM + attention</text>
+  <!-- rows -->
+  <text class="lbl" x="0" y="64">New regexes</text>
+  <line x1="502.5" y1="60" x2="610.6" y2="60" stroke="#C9CEDD" stroke-width="2"/>
+  <circle cx="502.5" cy="60" r="6" fill="#C9CEDD"/><circle cx="552.6" cy="60" r="6" fill="#7C86A6"/><circle cx="610.6" cy="60" r="6.5" fill="#2D45D8"/>
+  <text class="val" x="502.5" y="48" text-anchor="middle">92.4</text><text class="val" x="552.6" y="80" text-anchor="middle">95.6</text><text class="val best" x="610.6" y="48" text-anchor="middle">99.4</text>
+  <text class="lbl" x="0" y="109">New phrasings</text>
+  <line x1="228.3" y1="105" x2="345.8" y2="105" stroke="#C9CEDD" stroke-width="2"/>
+  <circle cx="228.3" cy="105" r="6" fill="#C9CEDD"/><circle cx="323.9" cy="105" r="6" fill="#7C86A6"/><circle cx="345.8" cy="105" r="6.5" fill="#2D45D8"/>
+  <text class="val" x="228.3" y="93" text-anchor="middle">75.1</text><text class="val" x="323.9" y="125" text-anchor="middle">81.2</text><text class="val best" x="345.8" y="93" text-anchor="middle">82.6</text>
+  <text class="lbl" x="0" y="154">Handwritten (50)</text>
+  <line x1="494.7" y1="150" x2="557.3" y2="150" stroke="#C9CEDD" stroke-width="2"/>
+  <circle cx="525.9" cy="150" r="6" fill="#C9CEDD"/><circle cx="494.7" cy="150" r="6" fill="#7C86A6"/><circle cx="557.3" cy="150" r="6.5" fill="#2D45D8"/>
+  <text class="val" x="525.9" y="138" text-anchor="middle">94.0</text><text class="val" x="494.7" y="170" text-anchor="middle">92.0</text><text class="val best" x="557.3" y="138" text-anchor="middle">96.0</text>
+</svg>
+</div>
+<p class="caption">Exact match (%), greedy decoding, first attention seed; the axis starts at 70%. A second seed gives 99.7 / 83.3 / 96.0. Beam search (width 5) changes the attention model's scores by at most 0.1 point.</p>
+<ul>
+<li><strong>Attention is decisive for new structures.</strong> At equal training (15 epochs) it removes nine tenths of the baseline's errors on new regexes, and six in seven against a baseline trained twice as long. The largest gain is on AND combinations: 99.4% against 92.5% for the 30-epoch baseline. It also learns far faster: 88.7% validation exact match after one epoch, against 7%.</li>
+<li><strong>Clean, interpretable outputs.</strong> 99.6 to 100% of outputs are valid regexes, and attention maps align each slot with its quoted literal, <code>~</code> with “not” and <code>&amp;</code> with “and”. Long descriptions such as “a regex for lines in which the text doesn’t begin with a digit and the text finishes with the substring ‘report’” give <code class="rx">(~([0-9].*))&amp;(.*report)</code> exactly.</li>
+<li><strong>New wording is the frontier.</strong> On held-out sentence patterns the long baseline is only 1.4 points behind: the limit there is the training language, not the architecture. Typical errors map an unseen construction onto a known one (“have X at the end” read as “starts with”, “no fewer than” read as “fewer than”).</li>
+</ul>
+
+<h2><span>6</span>Discussion and conclusion</h2>
+<p>The project stands out for its verified labels, rigorous out-of-distribution testing, a light from-scratch model with interpretable attention, and full reproducibility: the executed notebook regenerates the identical dataset and retrains both models to the same numbers. Its main limits are that template sentences are more regular than human writing (99.4% is an in-distribution score; the other two test sets are the honest estimates, and the handwritten set is small), that behavioural equivalence is a sampling test, and the 60-token output cap. Paraphrased training data is the natural next step. Lessons learned: check the labels before trusting a metric, and always test outside the generator’s distribution.</p>
+<p class="refs">The notebook, the full 10-page report, the slides and a live in-browser demo accompany this summary. References: Locascio et al., EMNLP 2016; Sutskever et al., NeurIPS 2014; Bahdanau et al., ICLR 2015; Ye et al., ACL 2020.</p>
+<div class="foot"><span>From English to Regular Expressions</span><span>2 / 2</span></div>
+</section>
+</body>
+</html>

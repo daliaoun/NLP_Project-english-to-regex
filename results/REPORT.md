@@ -57,7 +57,7 @@ The dialect is the one of NL-RX: `.`, character classes, `*`, `+`, `{n}`, `{n,}`
 
 - **Split by regex.** After removing duplicate (description, regex) pairs, the regex structures (with literals replaced by slots) are shuffled and assigned to train, validation or test, so no test regex appears in training. Single conditions all go to training, so the new-regex test consists of new combinations (1,031 AND, 597 OR, 236 negations; the 20 remaining single conditions all say "fewer than 5 capital letters", a condition whose regex happened to be drawn into the test split).
 - **New phrasings.** Generated with the held-out templates allowed and kept only if at least one was used, the regex is new and the anonymised description is not in training. Most words of these patterns occur in training in other combinations; the only unknown word is "each" (0.7% of tokens).
-- **Handwritten.** Fifty descriptions written by hand, with their meaning tree written by hand too, so their labels are verified like the others. They test wording, not structure: 46 of their 50 regexes also occur in training. 1.2% of their tokens are unknown ("word", "whose", "must", "be").
+- **Handwritten.** Fifty descriptions written by hand, with their meaning tree written by hand too, so their labels are verified like the others. They test wording, not structure: 46 of their 50 regexes also occur in training, and 4 of the simplest descriptions (such as "lines containing 'ice cream'", once the literal becomes a slot) can also be produced by the generator. 1.2% of their tokens are unknown ("word", "whose", "must", "be").
 - **Lengths (train):** 13.9 source tokens on average (max 37), 16.9 target tokens (max 67).
 
 ## 4. Preprocessing

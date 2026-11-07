@@ -1,7 +1,0 @@
-{
-  "best_epoch": 14,
-  "best_val_em": 0.47347347347347346,
-  "epochs_run": 22,
-  "train_minutes": 36.827158240477246,
-  "n_params": 2273707
-}

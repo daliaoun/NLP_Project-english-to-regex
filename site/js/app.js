@@ -17,7 +17,7 @@ function el(tag, props = {}, ...kids) {
 }
 
 /* ------------------------------------------------------------------ tabs and hash routing */
-const TABS = ["try", "report", "slides", "downloads"];
+const TABS = ["try", "notebook", "report", "slides", "downloads"];
 const lazyLoaded = new Set();
 
 function showTab(name, push = true) {
@@ -29,7 +29,7 @@ function showTab(name, push = true) {
     btn.setAttribute("aria-selected", String(on));
     btn.tabIndex = on ? 0 : -1;
   }
-  const frameId = { report: "report-frame", slides: "slides-frame" }[name];
+  const frameId = { notebook: "notebook-frame", report: "report-frame", slides: "slides-frame" }[name];
   if (frameId && !lazyLoaded.has(frameId)) {
     const f = $(frameId);
     f.src = f.dataset.src;
@@ -91,16 +91,16 @@ function setStatus(kind, text) {
   $("status-text").textContent = text;
 }
 
-function makeChips(list, host, hard) {
+function makeChips(list, host) {
   for (const ex of list) {
-    host.append(el("button", {
-      class: "chip" + (hard ? " hard" : ""), type: "button", text: ex.q,
-      onclick: () => { $("q").value = ex.q; run(ex.lines); $("q").focus({ preventScroll: true }); },
-    }));
+    host.append(el("li", {}, el("button", {
+      class: "ex chip", type: "button", text: ex.q,
+      onclick: () => { $("q").value = ex.q; run(ex.lines); $("result-card").scrollIntoView({ behavior: "smooth", block: "start" }); },
+    })));
   }
 }
-makeChips(GOOD, $("chips-good"), false);
-makeChips(HARD, $("chips-hard"), true);
+makeChips(GOOD, $("chips-good"));
+makeChips(HARD, $("chips-hard"));
 
 /* ------------------------------------------------------------------ loading */
 async function boot() {
@@ -116,6 +116,8 @@ async function boot() {
     $("rand").disabled = false;
     setStatus("ready", `Model ready (${(m.nParams / 1e6).toFixed(2)}M parameters, loaded in ${Math.round(performance.now() - t0)} ms). Runs in your browser.`);
     renderStats();
+    // show a first result straight away
+    if (!$("q").value) { $("q").value = GOOD[0].q; run(GOOD[0].lines); }
   } catch (e) {
     console.error(e);
     setStatus("error", "Could not load the model files. If you opened this page as a local file, serve the folder with a web server (for example: python3 -m http.server).");
@@ -126,6 +128,52 @@ function ensureBaseline() {
   if (base) return Promise.resolve(base);
   baseLoading ??= loadModel("baseline").then((m) => (base = m));
   return baseLoading;
+}
+
+/* ------------------------------------------------------------------ regex display */
+// split a regex into coloured pieces: literal text, character class, repetition, operator, grouping, "anything"
+function regexPieces(rx) {
+  const out = [];
+  for (let i = 0; i < rx.length;) {
+    const c = rx[i];
+    if (c === "[") {
+      const j = rx.indexOf("]", i + 2);
+      const end = j < 0 ? rx.length : j + 1;
+      const body = rx.slice(i, end);
+      out.push([body, body.length === 3 ? "lit" : "cls"]);   // [.] is an escaped literal
+      i = end;
+    } else if (c === "{") {
+      const j = rx.indexOf("}", i);
+      const end = j < 0 ? rx.length : j + 1;
+      out.push([rx.slice(i, end), "q"]); i = end;
+    } else if (c === "." ) {
+      if (rx[i + 1] === "*" || rx[i + 1] === "+") { out.push([rx.slice(i, i + 2), "any"]); i += 2; }
+      else { out.push([c, "any"]); i++; }
+    } else if (c === "*" || c === "+") { out.push([c, "q"]); i++; }
+    else if (c === "&" || c === "|" || c === "~") { out.push([c, "op"]); i++; }
+    else if (c === "(" || c === ")") { out.push([c, "grp"]); i++; }
+    else if (c === "\\" && rx[i + 1] === "b") { out.push(["\\b", "cls"]); i += 2; }
+    else { out.push([c, "lit"]); i++; }
+  }
+  return out;
+}
+
+let typingTimer = null;
+const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+function renderRegex(host, rx, animate) {
+  host.replaceChildren();
+  if (!rx) { host.textContent = "(empty output)"; return; }
+  const spans = regexPieces(rx).map(([t, k]) => el("span", { class: `r-tok r-${k}`, text: t }));
+  host.append(...spans);
+  if (!animate || reduceMotion) return;
+  // the decoder writes one symbol at a time: reveal the regex in the same order
+  clearInterval(typingTimer);
+  host.classList.add("typing");
+  let i = 0;
+  typingTimer = setInterval(() => {
+    if (i < spans.length) spans[i++].classList.add("on");
+    else { clearInterval(typingTimer); host.classList.remove("typing"); }
+  }, Math.max(12, Math.min(40, 700 / spans.length)));
 }
 
 /* ------------------------------------------------------------------ generate */
@@ -141,7 +189,7 @@ function run(lines) {
   const a = attn.translate(q);
   current = { q, a, b: null };
   $("result-card").hidden = false;
-  $("rx-attn").textContent = a.regex || "(empty output)";
+  renderRegex($("rx-attn"), a.regex, true);
 
   // tokens the model read (quoted literals are shown as the placeholder slot they became)
   const tok = $("tokens");
@@ -177,7 +225,7 @@ async function runBaseline() {
     const m = await ensureBaseline();
     if (!current) return;
     current.b = m.translate(current.q);
-    $("rx-base").textContent = current.b.regex || "(empty output)";
+    renderRegex($("rx-base"), current.b.regex, false);
     renderTester();
   } catch (e) {
     console.error(e);
@@ -210,23 +258,23 @@ function renderTester() {
     if (!ast) return null;
     try { return fullMatch(ast, line.slice(0, MAX_LEN)); } catch { return null; }
   };
-  const pill = (v, label) => {
-    const p = el("span", { class: "pill " + (v === null ? "bad" : v ? "yes" : "no"), text: v === null ? "invalid" : v ? "MATCH" : "no match" });
-    return label ? [p, el("span", { class: "pill-label", text: label })] : [p];
-  };
-
+  const flag = (v, label) => el("span", { class: "flag " + (v === null ? "bad" : v ? "yes" : "no") },
+    label ? el("small", { text: label }) : null, v === null ? "invalid" : v ? "match" : "no match");
+  let hits = 0;
   lines.forEach((line) => {
-    const row = el("div", { class: "t-row" });
-    row.append(el("span", { class: "t-line", text: line === "" ? "(empty line)" : line }));
     const ra = test(rxA, line);
-    pill(ra, showBase ? "attn" : null).forEach((n) => row.append(n));
+    if (ra) hits++;
+    const text = el("span", { class: "t-line" + (ra ? " hit" : "") },
+      line === "" ? el("span", { class: "empty", text: "(empty line)" }) : (ra ? el("mark", { text: line }) : line));
+    const flags = el("span", { class: "t-flags" }, flag(ra, showBase ? "attn" : null));
     if (showBase) {
       const rb = test(rxB, line);
-      pill(rb, "base").forEach((n) => row.append(n));
+      flags.append(flag(rb, "base"));
       if (ra !== rb) allSame = false;
     }
-    host.append(row);
+    host.append(el("div", { class: "t-row" }, text, flags));
   });
+  $("t-summary").textContent = rxA ? `${hits} of ${lines.length} line${lines.length === 1 ? "" : "s"} match` : "Result";
   if (!rxA) host.prepend(el("p", { class: "note warn", text: "The generated text is not a valid regular expression, so no line can be tested." }));
 
   // verdict of the comparison
@@ -306,9 +354,19 @@ function renderStats() {
   $("stats").replaceChildren(el("div", { class: "table-scroll" }, table));
 }
 
-const pickPill = (v) => v[1] ? el("span", { class: "pill exact", text: "EXACT MATCH" })
-  : v[2] ? el("span", { class: "pill same", text: "DIFFERENT BUT EQUIVALENT" })
-  : el("span", { class: "pill diff", text: "DIFFERENT" });
+const pickPill = (v) => v[1] ? el("span", { class: "pill exact", text: "Exact match" })
+  : v[2] ? el("span", { class: "pill same", text: "Equivalent, written differently" })
+  : el("span", { class: "pill diff", text: "Different" });
+
+/* ------------------------------------------------------------------ report version */
+document.querySelectorAll("[data-report]").forEach((b) => b.addEventListener("click", () => {
+  const full = b.dataset.report === "full";
+  document.querySelectorAll("[data-report]").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+  const f = $("report-frame");
+  f.src = full ? "report/report.html" : "report/short.html";
+  lazyLoaded.add("report-frame");
+  $("report-pdf").href = full ? "report/REPORT.pdf" : "report/REPORT_short.pdf";
+}));
 
 $("rand").addEventListener("click", () => {
   if (!testset) return;
@@ -319,7 +377,7 @@ $("rand").addEventListener("click", () => {
   const out = $("rand-out");
   out.hidden = false;
   out.replaceChildren(
-    el("p", { class: "small muted", text: SPLITS[r.k] + " test set" }),
+    el("p", { class: "small muted", text: "From the " + SPLITS[r.k].toLowerCase() + " test set" }),
     el("p", { class: "rand-desc", text: r.s }),
     el("div", { class: "rand-grid" },
       el("span", { class: "k", text: "Reference" }), el("div", { class: "v" }, el("code", { text: r.r })),

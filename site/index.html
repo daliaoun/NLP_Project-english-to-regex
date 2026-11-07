@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>NL2Regex: English to regular expressions</title>
-<meta name="description" content="A sequence-to-sequence model built from scratch that turns English descriptions into regular expressions. Runs entirely in your browser.">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23111A2C'/%3E%3Ctext x='32' y='43' font-family='monospace' font-size='34' font-weight='700' text-anchor='middle' fill='%23F2B544'%3E.*%3C/text%3E%3C/svg%3E">
-<link rel="preload" href="fonts/ibm-plex-sans-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+<meta name="description" content="Describe the lines you want to match in English; a sequence-to-sequence model built from scratch writes the regular expression. Runs entirely in your browser.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%232D45D8'/%3E%3Ctext x='32' y='44' font-family='monospace' font-size='34' font-weight='700' text-anchor='middle' fill='%23FFE14D'%3E.*%3C/text%3E%3C/svg%3E">
+<link rel="preload" href="fonts/recursive-latin-full-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -14,12 +14,13 @@
 
 <header class="top">
   <div class="wrap top-inner">
-    <a class="brand" href="#try" aria-label="NL2Regex home">
-      <span class="logo" aria-hidden="true">.*</span>
-      <span class="brand-text"><strong>NL2Regex</strong><small>English to regular expressions</small></span>
+    <a class="brand" href="#try" aria-label="NL2Regex, home">
+      <span class="mark" aria-hidden="true">.*</span>
+      <span class="brand-name">NL2Regex</span>
     </a>
     <nav class="tabs" role="tablist" aria-label="Sections">
       <button role="tab" id="t-try" aria-controls="tab-try" aria-selected="true" data-tab="try">Try it</button>
+      <button role="tab" id="t-notebook" aria-controls="tab-notebook" aria-selected="false" data-tab="notebook">Notebook</button>
       <button role="tab" id="t-report" aria-controls="tab-report" aria-selected="false" data-tab="report">Report</button>
       <button role="tab" id="t-slides" aria-controls="tab-slides" aria-selected="false" data-tab="slides">Slides</button>
       <button role="tab" id="t-downloads" aria-controls="tab-downloads" aria-selected="false" data-tab="downloads">Downloads</button>
@@ -27,184 +28,231 @@
   </div>
 </header>
 
-<main id="main" class="wrap">
+<main id="main">
 
-<!-- ============================================================ TRY IT -->
+<!-- ================================================================ TRY IT -->
 <section id="tab-try" role="tabpanel" aria-labelledby="t-try" class="panel">
-  <div class="hero">
-    <h1>Type English, get a regular expression</h1>
-    <p>An encoder-decoder network written from scratch, with no pretrained model and no API. It runs entirely in your browser, on weights trained with PyTorch.</p>
+  <div class="wrap">
+    <div class="ask-block">
+      <h1 class="ask-title"><label for="q">Describe the lines you want to match.</label></h1>
+      <p class="ask-sub">A 1.4M-parameter encoder-decoder, trained from scratch for this project, writes the regular expression. It runs in your browser; nothing you type is sent anywhere.</p>
+      <div class="ask">
+        <input id="q" type="text" autocomplete="off" spellcheck="false" maxlength="300"
+               placeholder="lines containing 'cat' at least 2 times">
+        <button id="go" class="btn primary" type="button" disabled>Generate regex</button>
+      </div>
+      <p class="status" id="status" role="status"><span class="dot" aria-hidden="true"></span><span id="status-text">Loading the model…</span></p>
+    </div>
+
   </div>
 
-  <div class="card" id="input-card">
-    <label for="q" class="label">Describe the lines you want to match</label>
-    <div class="ask">
-      <input id="q" type="text" autocomplete="off" spellcheck="false" maxlength="300"
-             placeholder="lines containing 'cat' at least 2 times">
-      <button id="go" class="btn primary" type="button" disabled>Generate regex</button>
-    </div>
-    <p class="status" id="status" role="status"><span class="dot"></span><span id="status-text">Loading the model…</span></p>
+  <div class="result" id="result-card" hidden aria-live="polite">
+    <div class="wrap">
+      <div class="rx-head">
+        <p class="rx-label">Regular expression <span class="muted">from the attention model</span></p>
+        <div class="rx-tools">
+          <button class="btn ghost small" type="button" data-copy="rx-attn">Copy</button>
+          <label class="switch">
+            <input type="checkbox" id="compare">
+            <span class="slider" aria-hidden="true"></span>
+            <span>Compare with the baseline</span>
+          </label>
+        </div>
+      </div>
+      <p class="rx-big"><code id="rx-attn"></code></p>
+      <div class="legend" aria-label="Colour key">
+        <span><i class="k-lit">abc</i> literal text</span>
+        <span><i class="k-cls">[0-9]</i> character type</span>
+        <span><i class="k-q">{2,}</i> repetition</span>
+        <span><i class="k-op">&amp; | ~</i> and, or, not</span>
+        <span><i class="k-any">.*</i> anything</span>
+      </div>
 
-    <div class="chips-block">
-      <p class="chips-title">Try one of these</p>
-      <div class="chips" id="chips-good"></div>
-      <p class="chips-title" id="hard-title">Harder cases <span class="muted">(the model gets these wrong, which is part of the analysis)</span></p>
-      <div class="chips" id="chips-hard"></div>
+      <div class="out-base" id="out-base" hidden>
+        <p class="rx-label">Baseline <span class="muted">(same network without attention)</span></p>
+        <p class="rx-mid"><code id="rx-base"></code></p>
+        <p class="verdict" id="cmp-verdict"></p>
+      </div>
+
+      <p class="note" id="dialect-note" hidden>This regex uses <code>&amp;</code> (and) or <code>~</code> (not) from the NL-RX dialect. Standard engines such as JavaScript or Python <code>re</code> do not support them; the tester below does.</p>
+
+      <div class="tokens-row">
+        <span class="muted">What the model read</span>
+        <span id="tokens" class="tokens"></span>
+      </div>
+      <p class="note warn" id="unk-note" hidden></p>
+
+      <div class="tester">
+        <div class="tester-in">
+          <label for="lines" class="t-head">Lines to test <span class="muted">one per row, edit freely</span></label>
+          <textarea id="lines" rows="7" spellcheck="false"></textarea>
+        </div>
+        <div class="tester-res">
+          <p class="t-head" id="t-summary">Result</p>
+          <div class="tester-out" id="tester-out" aria-live="polite"></div>
+        </div>
+      </div>
+
+      <details class="heat-box" id="heat-box">
+        <summary>Show where the model looked while writing each symbol</summary>
+        <p class="muted small">Rows are the generated regex symbols, columns are the words of your description. Darker means more attention.</p>
+        <div class="heat-scroll" id="heat"></div>
+      </details>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div class="examples">
+      <div>
+        <h2 class="ex-title">Examples it gets right</h2>
+        <ul class="ex-list" id="chips-good"></ul>
+      </div>
+      <div>
+        <h2 class="ex-title">Known failures</h2>
+        <p class="ex-note">Wording the model never saw in training. Explaining these is part of the analysis.</p>
+        <ul class="ex-list hard" id="chips-hard"></ul>
+      </div>
     </div>
 
     <details class="tips">
       <summary>How to write a description</summary>
       <ul>
-        <li>Put literal text in quotes: <code>'cat'</code>, <code>"2024"</code>, <code>'ice cream'</code>. Any word works: the model sees it as a slot and copies it into the regex.</li>
-        <li>It understands: contains, starts with, ends with, is exactly, at least / fewer than N times, N times in a row, before / immediately followed by, length (at least, at most, exactly), made only of, and the words <em>not</em>, <em>and</em>, <em>or</em>.</li>
+        <li>Put literal text in quotes: <code>'cat'</code>, <code>"2024"</code>, <code>'ice cream'</code>. Any word works: the model treats it as a slot and copies it into the regex.</li>
+        <li>It understands contains, starts with, ends with, is exactly, at least or fewer than N times, N times in a row, before, immediately followed by, length (at least, at most, exactly), made only of, and the words not, and, or.</li>
         <li>Character types: digit (number), letter, capital (uppercase), lowercase, vowel, space.</li>
-        <li>Regexes match the <strong>whole line</strong>. The dialect adds <code>&amp;</code> (and) and <code>~</code> (not), which ordinary regex engines do not have, so the tester below uses our own matcher.</li>
-        <li>It is a small model (1.4M parameters) trained only on our generated sentences: wording far from them, such as “kick off with”, is where it fails.</li>
+        <li>A regex must match the <strong>whole line</strong>. The dialect adds <code>&amp;</code> (and) and <code>~</code> (not), which ordinary regex engines lack, so the tester uses our own matcher.</li>
       </ul>
     </details>
-  </div>
-
-  <div class="card result" id="result-card" hidden aria-live="polite">
-    <div class="result-head">
-      <h2>Regular expression</h2>
-      <label class="switch">
-        <input type="checkbox" id="compare">
-        <span class="slider" aria-hidden="true"></span>
-        <span>Compare with the baseline (no attention)</span>
-      </label>
-    </div>
-
-    <div class="out-row" id="out-attn">
-      <div class="out-label"><span class="tag teal">Attention model</span><span class="muted small">best model</span></div>
-      <div class="out-code"><code id="rx-attn"></code><button class="btn ghost small" type="button" data-copy="rx-attn">Copy</button></div>
-    </div>
-    <div class="out-row" id="out-base" hidden>
-      <div class="out-label"><span class="tag amber">Baseline</span><span class="muted small">LSTM without attention, trained 30 epochs</span></div>
-      <div class="out-code"><code id="rx-base"></code><button class="btn ghost small" type="button" data-copy="rx-base">Copy</button></div>
-      <p class="small verdict" id="cmp-verdict"></p>
-    </div>
-
-    <p class="note" id="dialect-note" hidden>This regex uses <code>&amp;</code> (and) or <code>~</code> (not) from the NL-RX dialect. Standard engines such as JavaScript or Python <code>re</code> do not support them; the tester below does.</p>
-
-    <div class="tokens-row">
-      <span class="small muted">What the model read:</span>
-      <span id="tokens" class="tokens"></span>
-    </div>
-    <p class="note warn" id="unk-note" hidden></p>
-
-    <h3>Test it on your own lines</h3>
-    <p class="small muted">One line per row. A line matches only if the regex matches the whole line.</p>
-    <div class="tester">
-      <textarea id="lines" rows="6" spellcheck="false" aria-label="Lines to test"></textarea>
-      <div class="tester-out" id="tester-out" aria-live="polite"></div>
-    </div>
-
-    <details class="heat-box" id="heat-box">
-      <summary>Show where the model looked (attention)</summary>
-      <p class="small muted">Rows are the generated regex tokens, columns are the words of your description. Darker teal means more attention.</p>
-      <div class="heat-scroll" id="heat"></div>
-    </details>
-  </div>
-
-  <div class="card" id="test-card">
-    <div class="result-head">
-      <h2>Held-out test examples</h2>
-      <button id="rand" class="btn" type="button" disabled>Show a random test example</button>
-    </div>
-    <p class="small muted">None of these regexes was seen in training. <strong>New regexes</strong>: new combinations and parameters, in the training style. <strong>New phrasings</strong>: sentence patterns held out of training. <strong>Handwritten</strong>: 50 descriptions written by hand. “Same behaviour” means the generated regex accepts and rejects exactly the same strings as the reference on about 600 probe strings.</p>
-    <div id="stats"></div>
-    <div class="rand-row">
-      <label for="rand-split" class="small">Pick from</label>
-      <select id="rand-split">
-        <option value="all">all test sets</option>
-        <option value="t">new regexes</option>
-        <option value="p">new phrasings</option>
-        <option value="h">handwritten</option>
-      </select>
-    </div>
-    <div id="rand-out" class="rand-out" hidden></div>
+    <section class="eval" id="test-card" aria-labelledby="eval-title">
+      <div class="eval-head">
+        <h2 id="eval-title">How well it works</h2>
+        <p class="muted">Three test sets, none of whose regexes was used for training. <strong>New regexes</strong>: new combinations in the training style. <strong>New phrasings</strong>: sentence patterns held out of training. <strong>Handwritten</strong>: 50 descriptions written by hand. “Same behaviour” means the regex accepts and rejects exactly the same 600 probe strings as the reference.</p>
+      </div>
+      <div id="stats"></div>
+      <div class="rand-row">
+        <button id="rand" class="btn" type="button" disabled>Show a random test example</button>
+        <label for="rand-split" class="muted">from</label>
+        <select id="rand-split">
+          <option value="all">all test sets</option>
+          <option value="t">new regexes</option>
+          <option value="p">new phrasings</option>
+          <option value="h">handwritten</option>
+        </select>
+      </div>
+      <div id="rand-out" class="rand-out" hidden></div>
+    </section>
   </div>
 </section>
 
-<!-- ============================================================ REPORT -->
+<!-- ================================================================ NOTEBOOK -->
+<section id="tab-notebook" role="tabpanel" aria-labelledby="t-notebook" class="panel" hidden>
+  <div class="wrap">
+    <div class="doc-head">
+      <div>
+        <h1>Notebook</h1>
+        <p class="muted">The whole project in one executed notebook: dataset generation, exploratory data analysis, preprocessing, model, training of both models, evaluation, attention, error analysis and a demo. Rerunning it regenerates the identical dataset and retrains both models to the same numbers.</p>
+      </div>
+      <div class="doc-actions">
+        <a class="btn primary" href="downloads/NL2Regex_notebook.ipynb" download>Download .ipynb</a>
+        <a class="btn" href="notebook/index.html" target="_blank" rel="noopener">Open in a new tab</a>
+      </div>
+    </div>
+    <iframe id="notebook-frame" class="frame tall" title="Executed notebook" data-src="notebook/index.html"></iframe>
+  </div>
+</section>
+
+<!-- ================================================================ REPORT -->
 <section id="tab-report" role="tabpanel" aria-labelledby="t-report" class="panel" hidden>
-  <div class="hero compact">
-    <h1>Technical report</h1>
-    <p>Task, dataset, preprocessing, architecture, training, results, examples and discussion.</p>
+  <div class="wrap">
+    <div class="doc-head">
+      <div>
+        <h1>Report</h1>
+        <p class="muted">The two-page report summarises the task, data, model and results. The full report has ten sections with every table, figure and the error analysis.</p>
+      </div>
+      <div class="doc-actions">
+        <div class="seg" role="group" aria-label="Report version">
+          <button type="button" class="seg-btn" data-report="short" aria-pressed="true">Short, 2 pages</button>
+          <button type="button" class="seg-btn" data-report="full" aria-pressed="false">Full, 10 pages</button>
+        </div>
+        <a class="btn primary" id="report-pdf" href="report/REPORT_short.pdf" download>Download PDF</a>
+      </div>
+    </div>
+    <iframe id="report-frame" class="frame tall" title="Report" data-src="report/short.html"></iframe>
   </div>
-  <div class="kpis">
-    <div class="kpi"><strong>99.4%</strong><span>exact match on new regexes</span></div>
-    <div class="kpi"><strong>82.6%</strong><span>exact match on held-out phrasings</span></div>
-    <div class="kpi"><strong>48 / 50</strong><span>handwritten descriptions correct</span></div>
-    <div class="kpi"><strong>6 in 7</strong><span>baseline errors removed by attention (new regexes)</span></div>
-  </div>
-  <div class="actions">
-    <a class="btn primary" href="report/REPORT.pdf" download>Download PDF</a>
-    <a class="btn" href="report/report.html" target="_blank" rel="noopener">Open in a new tab</a>
-  </div>
-  <iframe id="report-frame" class="frame tall" title="Technical report" data-src="report/report.html"></iframe>
 </section>
 
-<!-- ============================================================ SLIDES -->
+<!-- ================================================================ SLIDES -->
 <section id="tab-slides" role="tabpanel" aria-labelledby="t-slides" class="panel" hidden>
-  <div class="hero compact">
-    <h1>Presentation</h1>
-    <p>19 slides with speaker notes. Use the arrow keys, or the buttons inside the viewer.</p>
+  <div class="wrap">
+    <div class="doc-head">
+      <div>
+        <h1>Slides</h1>
+        <p class="muted">19 slides with speaker notes. Use the arrow keys or the buttons inside the viewer.</p>
+      </div>
+      <div class="doc-actions">
+        <a class="btn primary" href="slides/NL2Regex-slides.pdf" download>Download PDF</a>
+        <a class="btn" href="slides/index.html" target="_blank" rel="noopener">Open full screen</a>
+      </div>
+    </div>
+    <div class="slides-box"><iframe id="slides-frame" class="frame" title="Slides" data-src="slides/index.html?embed=1" allowfullscreen></iframe></div>
   </div>
-  <div class="actions">
-    <a class="btn primary" href="slides/index.html" target="_blank" rel="noopener">Open full screen</a>
-    <a class="btn" href="slides/NL2Regex-slides.pdf" download>Download PDF</a>
-  </div>
-  <div class="slides-box"><iframe id="slides-frame" class="frame" title="Presentation" data-src="slides/index.html?embed=1" allowfullscreen></iframe></div>
 </section>
 
-<!-- ============================================================ DOWNLOADS -->
+<!-- ================================================================ DOWNLOADS -->
 <section id="tab-downloads" role="tabpanel" aria-labelledby="t-downloads" class="panel" hidden>
-  <div class="hero compact">
-    <h1>Deliverables and how it works</h1>
-    <p>Everything the assignment asks for: source code, report and presentation.</p>
-  </div>
-  <div class="dl-grid">
-    <a class="dl" href="downloads/nl2regex-source-code.zip" download>
-      <strong>A. Source code</strong>
-      <span>Preprocessing, vocabularies, encoder, decoder, attention, training, evaluation and the regex checker (Python and PyTorch), plus run logs and results.</span>
-      <em>nl2regex-source-code.zip</em>
-    </a>
-    <a class="dl" href="report/REPORT.pdf" download>
-      <strong>B. Technical report</strong>
-      <span>Ten sections with parameter counts, curves, examples, baseline versus attention and failure analysis.</span>
-      <em>REPORT.pdf</em>
-    </a>
-    <a class="dl" href="slides/NL2Regex-slides.pdf" download>
-      <strong>C. Presentation</strong>
-      <span>Task, dataset, architecture, training, results, examples, limitations and next steps.</span>
-      <em>NL2Regex-slides.pdf</em>
-    </a>
-  </div>
+  <div class="wrap narrow">
+    <h1>Downloads</h1>
+    <p class="muted">Everything handed in for the course, plus the code to reproduce it.</p>
+    <ul class="files">
+      <li>
+        <div><strong>Notebook</strong><span>The whole project, executed: generation, EDA, preprocessing, model, training, evaluation, analysis.</span></div>
+        <em>.ipynb, 0.9 MB</em>
+        <a class="btn small" href="downloads/NL2Regex_notebook.ipynb" download>Download</a>
+      </li>
+      <li>
+        <div><strong>Short report</strong><span>Two pages: task, dataset, preprocessing, model, results, conclusion.</span></div>
+        <em>PDF, 0.7 MB</em>
+        <a class="btn small" href="report/REPORT_short.pdf" download>Download</a>
+      </li>
+      <li>
+        <div><strong>Full report</strong><span>Ten sections with parameter counts, learning curves, examples, error analysis and limitations.</span></div>
+        <em>PDF, 1.3 MB</em>
+        <a class="btn small" href="report/REPORT.pdf" download>Download</a>
+      </li>
+      <li>
+        <div><strong>Slides</strong><span>19 slides for the presentation.</span></div>
+        <em>PDF, 0.4 MB</em>
+        <a class="btn small" href="slides/NL2Regex-slides.pdf" download>Download</a>
+      </li>
+      <li>
+        <div><strong>Source code</strong><span>Python and PyTorch code, the generated dataset, trained models, logs and results.</span></div>
+        <em>ZIP, 14 MB</em>
+        <a class="btn small" href="downloads/nl2regex-source-code.zip" download>Download</a>
+      </li>
+    </ul>
 
-  <div class="card prose">
     <h2>How this website works</h2>
-    <ul>
-      <li><strong>No server.</strong> The two trained models (1.38M and 0.96M parameters) are downloaded once and run in your browser, in plain JavaScript written for this project. Nothing you type leaves your computer.</li>
-      <li><strong>Same answers as PyTorch.</strong> The JavaScript inference was checked against the original PyTorch models on all 3,434 test sentences: identical output for every one, for both models.</li>
-      <li><strong>Our own regex matcher.</strong> The regex dialect has intersection (<code>&amp;</code>) and complement (<code>~</code>), so a matcher was written for it and checked against the Python one on about 3 million (regex, string) pairs.</li>
-      <li><strong>Model.</strong> Embedding (128), one LSTM layer (256), a linear and tanh bridge, then an LSTM decoder with additive attention over the input words. Greedy decoding, stopping at the end token. Quoted literals become slots (<code>__w0__</code>, <code>__w1__</code>) and are copied back after decoding.</li>
-      <li><strong>Data.</strong> VeriRegex, built for this project because the standard NL-RX labels sometimes contradict their English. Every pair comes from one meaning tree and is checked by an independent Python definition on about 300 strings. 37,586 training pairs; test sets of new regexes, new phrasings and handwritten descriptions.</li>
+    <ul class="plain">
+      <li><strong>No server.</strong> The two trained models (1.38M and 0.96M parameters) are downloaded once and run in plain JavaScript written for this project.</li>
+      <li><strong>Same answers as PyTorch.</strong> The browser models were checked against the PyTorch models on all 3,434 test sentences: identical output for every one.</li>
+      <li><strong>Our own regex matcher.</strong> The dialect has intersection <code>&amp;</code> and complement <code>~</code>; the matcher was checked against the Python one on about 3 million (regex, string) pairs.</li>
+      <li><strong>Literal slots.</strong> Quoted words become <code>__w0__</code>, <code>__w1__</code> before the model sees them and are copied back afterwards, so any word works.</li>
+      <li><strong>Data.</strong> VeriRegex, generated for this project: every label is checked against an independent Python definition on about 300 strings.</li>
     </ul>
     <h2>Run the Python code</h2>
-    <pre><code>pip install torch matplotlib        # the dataset is already inside the zip
-python src/train.py --name lstm_attn --attention      # train
-python src/evaluate.py results/lstm_attn --beam 5     # evaluate
-python src/demo.py --run results/lstm_attn            # terminal demo</code></pre>
+    <pre><code>pip install torch matplotlib        # the dataset is inside the zip
+python src/train.py --name attn --attention --dropout 0.3 --word_dropout 0.05 --epochs 15 --patience 4
+python src/evaluate.py results/attn --beam 5
+python src/demo.py --run results/attn</code></pre>
   </div>
 </section>
 
 </main>
 
 <footer class="foot">
-  <div class="wrap">
-    <span>NLP course project by Mohamed Ali Aoun · encoder-decoder text generation</span>
-    <span class="muted">Data: VeriRegex, generated and verified for this project. Fonts: IBM Plex Sans, JetBrains Mono.</span>
+  <div class="wrap foot-inner">
+    <p>NLP course project by Mohamed Ali Aoun, Université Paris Dauphine Tunis.</p>
+    <p class="muted">Encoder-decoder text generation, built from scratch. Typeface: Recursive.</p>
   </div>
 </footer>
 

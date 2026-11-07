@@ -1,0 +1,4 @@
+[NbConvertApp] Converting notebook NL2Regex_notebook.ipynb to notebook
+[IPKernelApp] WARNING | Kernel is running over TCP without encryption. All communication (including code and outputs) is sent in plain text and is susceptible to eavesdropping. Use IPC transport or launch with kernel manager-provisioned CurveZMQ keys to enable transport encryption.
+[NbConvertApp] Writing 863627 bytes to NL2Regex_notebook.ipynb
+EXIT 0

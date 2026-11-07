@@ -22,16 +22,24 @@ web page without any server (`site/`).
 | New phrasings (sentence patterns held out of training) | 1,500 | 81.2 / 83.3 | **82.6 / 84.3** |
 | Handwritten descriptions | 50 | 92.0 / 92.0 | **96.0 / 96.0** |
 
-Details, analysis and limitations: `results/REPORT.md` (PDF: `results/REPORT.pdf`).
+Details, analysis and limitations: `results/REPORT.md` (PDF: `results/REPORT.pdf`); two-page version: `results/REPORT_short.pdf`.
 
 ## Why our own dataset
 
 The standard benchmark, NL-RX (Locascio et al., 2016), has labels that sometimes contradict their
 English: "lines with the string 'dog' at least 2 times" is labelled `.*(dog){2,}.*`, which rejects
 `dog and dog`. Our first version on NL-RX reached 45.3% exact match; it is archived in
-`results/nlrx_v1/`. `src/generate.py` builds every example from one meaning tree, writes the English
+`results/nlrx_v1.zip`. `src/generate.py` builds every example from one meaning tree, writes the English
 (216 phrasing templates, 135 literal words) and the regex from it, and checks the regex against an
 independent Python predicate on about 300 strings per example. Any disagreement stops the build.
+
+## Notebook
+
+`NL2Regex_notebook.ipynb` is the whole project in one executed notebook: dataset generation, exploratory
+data analysis, preprocessing, model, training, evaluation, analysis and a demo. Its code cells are
+extracted from `src/` (`python tools/build_notebook.py`), so it runs exactly the same code. With
+`REGENERATE` and `RETRAIN` set to `True` it takes about 1.5 hours on a CPU; with `RETRAIN = False` it
+loads the trained models from `results/` and runs in a few minutes.
 
 ## Layout
 
