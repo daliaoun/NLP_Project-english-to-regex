@@ -1,5 +1,7 @@
 # NL2Regex website
 
+**Author:** Mohamed Ali Aoun, Université Paris Dauphine Tunis
+
 A static site (HTML, CSS, JavaScript, no build step, no server). The two trained models run in the browser.
 Tabs: Try it, Report, Slides, Downloads.
 

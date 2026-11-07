@@ -12,19 +12,12 @@ SRC = ROOT / "tools" / "slides_src"
 OUT = ROOT / "site" / "slides" / "index.html"
 deck = json.loads((SRC / "deck.json").read_text())
 
-BLOBS = {
-    "/_blob/aee40b7a44ed013204da9b44d69b4c9a": "img/learning_curves.png",
-    "/_blob/4805ce116864ff27f218f6b647cc45fd": "img/attention_examples.png",
-}
-
 slides, notes = [], []
 for name in deck["order"]:
     s = (SRC / f"{name}.html").read_text()
     m = re.search(r"<aside>(.*?)</aside>", s, re.S)
     notes.append(html.unescape(m.group(1).strip()) if m else "")
     s = re.sub(r"<aside>.*?</aside>", "", s, flags=re.S)
-    for k, v in BLOBS.items():
-        s = s.replace(k, v)
     # <x-shape kind="arrow-right" style="..."> -> clipped div
     s = re.sub(r'<x-shape kind="(arrow-right|arrow-down)"', lambda mm: f'<div class="shape {mm.group(1)}"', s)
     s = s.replace("</x-shape>", "</div>")
@@ -39,6 +32,7 @@ PAGE = """<!doctype html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>NL2Regex: presentation</title>
+<meta name="author" content="Mohamed Ali Aoun">
 <style>
 @font-face{font-family:"IBM Plex Sans";font-weight:400;font-style:normal;font-display:swap;src:url(../fonts/ibm-plex-sans-latin-400-normal.woff2) format("woff2")}
 @font-face{font-family:"IBM Plex Sans";font-weight:500;font-style:normal;font-display:swap;src:url(../fonts/ibm-plex-sans-latin-500-normal.woff2) format("woff2")}

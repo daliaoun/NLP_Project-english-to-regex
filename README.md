@@ -1,6 +1,8 @@
 # NL2Regex: English to regular expressions with an encoder-decoder (from scratch)
 
-NLP course project (text generation with encoder-decoder architectures), Mohamed Ali Aoun.
+**Author:** Mohamed Ali Aoun, Université Paris Dauphine Tunis
+
+NLP course project (text generation with encoder-decoder architectures).
 
 A sequence-to-sequence model written in PyTorch, with no pretrained component, reads an English
 description such as

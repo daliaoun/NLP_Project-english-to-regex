@@ -3,7 +3,8 @@
 <html lang="en">
 <head><meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>NL2Regex_notebook</title>
+<title>NL2Regex notebook, Mohamed Ali Aoun</title>
+<meta name="author" content="Mohamed Ali Aoun">
 <style type="text/css">
     pre { line-height: 125%; }
 td.linenos .normal { color: inherit; background-color: transparent; padding-left: 5px; padding-right: 5px; }
@@ -7802,7 +7803,8 @@ a.anchor-link {
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h1 id="NL2Regex:-from-English-to-regular-expressions-with-an-encoder-decoder">NL2Regex: from English to regular expressions with an encoder-decoder<a class="anchor-link" href="#NL2Regex:-from-English-to-regular-expressions-with-an-encoder-decoder">¶</a></h1><p><strong>NLP course project, text generation with encoder-decoder architectures.</strong> Mohamed Ali Aoun, Université Paris Dauphine Tunis.</p>
+<h1 id="NL2Regex:-from-English-to-regular-expressions-with-an-encoder-decoder">NL2Regex: from English to regular expressions with an encoder-decoder<a class="anchor-link" href="#NL2Regex:-from-English-to-regular-expressions-with-an-encoder-decoder">¶</a></h1><p><strong>Author:</strong> Mohamed Ali Aoun, Université Paris Dauphine Tunis</p>
+<p>NLP course project, text generation with encoder-decoder architectures.</p>
 <p>This notebook contains the whole project in one place and runs from top to bottom:</p>
 <table>
 <thead>
@@ -9362,7 +9364,7 @@ matching probes: [' 7 Ea', ' 7-x7--', '0aE E 7', 'E 0E', 'Z e0- 0Quu', 'a 0-.uu'
         <span class="nb">print</span><span class="p">(</span><span class="s2">"identical to the dataset shipped in data/veriregex:"</span><span class="p">,</span> <span class="n">same</span><span class="p">)</span>
 <span class="k">else</span><span class="p">:</span>
     <span class="n">DATA</span> <span class="o">=</span> <span class="n">PROJECT</span> <span class="o">/</span> <span class="s2">"data"</span> <span class="o">/</span> <span class="s2">"veriregex"</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">"using"</span><span class="p">,</span> <span class="n">DATA</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"using"</span><span class="p">,</span> <span class="n">DATA</span><span class="o">.</span><span class="n">relative_to</span><span class="p">(</span><span class="n">PROJECT</span><span class="p">)</span><span class="o">.</span><span class="n">as_posix</span><span class="p">())</span>
 </pre></div>
 </div>
 </div>
@@ -9389,7 +9391,7 @@ matching probes: [' 7 Ea', ' 7-x7--', '0aE E 7', 'E 0E', 'Z e0- 0Quu', 'a 0-.uu'
   "minutes": 4.5
 }
 identical to the dataset shipped in data/veriregex: True
-using /home/claude/nl2regex/notebook_runs/veriregex
+using notebook_runs/veriregex
 </pre>
 </div>
 </div>

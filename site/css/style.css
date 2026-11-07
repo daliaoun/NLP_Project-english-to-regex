@@ -39,6 +39,8 @@ pre code{background:none;padding:0;color:inherit}
 .mark{display:grid;place-items:center;width:38px;height:38px;border-radius:10px;background:var(--cobalt);color:var(--marker);
   font-variation-settings:var(--code);font-weight:800;font-size:20px}
 .brand-name{font-weight:780;font-size:20px;letter-spacing:-.2px;font-variation-settings:"MONO" 0,"CASL" .8}
+.brand-by{font-size:14px;font-weight:500;color:var(--muted);padding-left:10px;border-left:1px solid var(--rule)}
+@media (max-width:520px){.brand-by{display:none}}
 .tabs{display:flex;gap:2px;flex-wrap:wrap}
 .tabs button{font:inherit;font-variation-settings:var(--text);font-size:15.5px;font-weight:560;color:var(--muted);background:none;border:0;
   padding:20px 12px 17px;cursor:pointer;border-bottom:3px solid transparent}

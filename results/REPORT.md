@@ -1,6 +1,8 @@
 # From English to regular expressions: an encoder-decoder with attention, trained on a verified dataset
 
-NLP course project, text generation with encoder-decoder architectures. Mohamed Ali Aoun.
+**Author:** Mohamed Ali Aoun, Université Paris Dauphine Tunis
+
+NLP course project, text generation with encoder-decoder architectures.
 All numbers below come from the code and logs in this repository (`results/`, `logs/`).
 
 ## 1. Introduction

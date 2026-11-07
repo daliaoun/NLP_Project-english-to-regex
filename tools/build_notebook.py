@@ -71,7 +71,9 @@ def code(s):
 md("""
 # NL2Regex: from English to regular expressions with an encoder-decoder
 
-**NLP course project, text generation with encoder-decoder architectures.** Mohamed Ali Aoun, Université Paris Dauphine Tunis.
+**Author:** Mohamed Ali Aoun, Université Paris Dauphine Tunis
+
+NLP course project, text generation with encoder-decoder architectures.
 
 This notebook contains the whole project in one place and runs from top to bottom:
 
@@ -293,7 +295,7 @@ if REGENERATE:
         print("identical to the dataset shipped in data/veriregex:", same)
 else:
     DATA = PROJECT / "data" / "veriregex"
-print("using", DATA)
+print("using", DATA.relative_to(PROJECT).as_posix())
 ''')
 
 # =====================================================================================================
@@ -803,7 +805,7 @@ The full technical report (`results/REPORT.pdf`), the slides and an in-browser d
 
 nb = nbf.v4.new_notebook()
 nb["cells"] = cells
-nb["metadata"] = {"kernelspec": {"display_name": "Python 3", "language": "python", "name": "python3"},
+nb["metadata"] = {"authors": [{"name": "Mohamed Ali Aoun"}], "kernelspec": {"display_name": "Python 3", "language": "python", "name": "python3"},
                   "language_info": {"name": "python"}}
 out = ROOT / "NL2Regex_notebook.ipynb"
 nbf.write(nb, out)

@@ -8,7 +8,7 @@ mkdir -p site/report/img
 cp results/learning_curves.png results/attention_examples.png site/report/img/
 # web version
 sed -E 's#\]\((learning_curves|attention_examples)\.png\)#](img/\1.png)#' results/REPORT.md > "$B/web.md"
-pandoc -f gfm -t html5 -s --metadata pagetitle="NL2Regex technical report" -c report.css "$B/web.md" -o site/report/report.html
+pandoc -f gfm -t html5 -s --metadata pagetitle="NL2Regex technical report" --metadata author-meta="Mohamed Ali Aoun" -c report.css "$B/web.md" -o site/report/report.html
 python3 - <<'P'
 import re
 p = "site/report/report.html"; x = open(p).read()
